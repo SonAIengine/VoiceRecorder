@@ -1,45 +1,35 @@
 import SwiftUI
 
+enum AppMode: String, CaseIterable {
+    case lifeLog = "LifeLog"
+    case manual = "녹음"
+}
+
 struct ContentView: View {
     @State private var recorder = AudioRecorder()
+    @State private var mode: AppMode = .lifeLog
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // 녹음 목록
-                List {
-                    ForEach(recorder.recordings) { recording in
-                        NavigationLink {
-                            RecordingDetailView(recording: recording, recorder: recorder)
-                        } label: {
-                            RecordingRow(recording: recording)
-                        }
-                    }
-                    .onDelete { indexSet in
-                        for index in indexSet {
-                            recorder.deleteRecording(recorder.recordings[index])
-                        }
+                Picker("Mode", selection: $mode) {
+                    ForEach(AppMode.allCases, id: \.self) { m in
+                        Text(m.rawValue).tag(m)
                     }
                 }
-                .listStyle(.plain)
-                .overlay {
-                    if recorder.recordings.isEmpty {
-                        ContentUnavailableView(
-                            "녹음이 없습니다",
-                            systemImage: "mic.slash",
-                            description: Text("아래 버튼을 눌러 녹음을 시작하세요")
-                        )
-                    }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+
+                switch mode {
+                case .lifeLog:
+                    LifeLogView(recorder: recorder)
+                case .manual:
+                    ManualRecordingView(recorder: recorder)
                 }
-
-                Divider()
-
-                // 녹음 컨트롤
-                RecordingControlView(recorder: recorder)
-                    .padding()
-                    .background(.ultraThinMaterial)
             }
-            .navigationTitle("음성 녹음기")
+            .navigationTitle("VoiceRecorder")
+            .navigationBarTitleDisplayMode(.inline)
             .alert("오류", isPresented: .init(
                 get: { recorder.errorMessage != nil },
                 set: { if !$0 { recorder.errorMessage = nil } }
@@ -51,6 +41,64 @@ struct ContentView: View {
         }
     }
 }
+
+// MARK: - LifeLog Tab
+
+struct LifeLogView: View {
+    @Bindable var recorder: AudioRecorder
+
+    var body: some View {
+        VStack(spacing: 0) {
+            LifeLogControlView(recorder: recorder)
+                .padding(.top, 8)
+
+            SessionListView(sessionManager: recorder.sessionManager)
+        }
+    }
+}
+
+// MARK: - Manual Recording Tab (기존 UI 유지)
+
+struct ManualRecordingView: View {
+    @Bindable var recorder: AudioRecorder
+
+    var body: some View {
+        VStack(spacing: 0) {
+            List {
+                ForEach(recorder.recordings) { recording in
+                    NavigationLink {
+                        RecordingDetailView(recording: recording, recorder: recorder)
+                    } label: {
+                        RecordingRow(recording: recording)
+                    }
+                }
+                .onDelete { indexSet in
+                    for index in indexSet {
+                        recorder.deleteRecording(recorder.recordings[index])
+                    }
+                }
+            }
+            .listStyle(.plain)
+            .overlay {
+                if recorder.recordings.isEmpty {
+                    ContentUnavailableView(
+                        "녹음이 없습니다",
+                        systemImage: "mic.slash",
+                        description: Text("아래 버튼을 눌러 녹음을 시작하세요")
+                    )
+                }
+            }
+
+            Divider()
+
+            RecordingControlView(recorder: recorder)
+                .padding()
+                .background(.ultraThinMaterial)
+        }
+    }
+}
+
+// MARK: - Shared Components
 
 struct RecordingRow: View {
     let recording: Recording
@@ -88,7 +136,6 @@ struct RecordingControlView: View {
 
             HStack(spacing: 40) {
                 if recorder.isRecording {
-                    // 일시정지/재개
                     Button {
                         if recorder.isPaused {
                             recorder.resumeRecording()
@@ -102,7 +149,6 @@ struct RecordingControlView: View {
                             .background(Circle().fill(.gray.opacity(0.2)))
                     }
 
-                    // 정지
                     Button {
                         recorder.stopRecording()
                     } label: {
@@ -113,7 +159,6 @@ struct RecordingControlView: View {
                             .background(Circle().fill(.red))
                     }
                 } else {
-                    // 녹음 시작
                     Button {
                         recorder.startRecording()
                     } label: {

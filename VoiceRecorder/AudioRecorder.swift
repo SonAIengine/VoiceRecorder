@@ -1,16 +1,30 @@
 import AVFoundation
 import Speech
-import Combine
 
 @Observable
-final class AudioRecorder {
+final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSessionHandlerDelegate {
+    // Manual mode state
     var isRecording = false
     var isPaused = false
     var recordings: [Recording] = []
     var currentTime: TimeInterval = 0
     var errorMessage: String?
 
-    private var audioRecorder: AVAudioRecorder?
+    // LifeLog state
+    var isLifeLogActive = false
+    var lifeLogSessionTime: TimeInterval = 0
+    var currentPowerLevel: Float = -160.0
+    var vadState: VADState = .active
+    var vadSilenceDuration: TimeInterval = 0
+
+    // Components
+    private let engine = RecordingEngine()
+    private let vad = VADMonitor()
+    let sessionManager = SessionManager()
+    private let audioSessionHandler = AudioSessionHandler()
+
+    // Manual mode internals
+    private var manualRecorder: AVAudioRecorder?
     private var timer: Timer?
     private let fileManager = FileManager.default
 
@@ -24,13 +38,131 @@ final class AudioRecorder {
     }
 
     init() {
+        engine.delegate = self
+        vad.delegate = self
+        audioSessionHandler.delegate = self
         loadRecordings()
     }
+
+    // MARK: - LifeLog Mode
+
+    func startLifeLog() {
+        do {
+            try audioSessionHandler.configure()
+        } catch {
+            errorMessage = "오디오 세션 설정 실패: \(error.localizedDescription)"
+            return
+        }
+
+        let session = sessionManager.startSession()
+        isLifeLogActive = true
+        lifeLogSessionTime = 0
+
+        engine.start { [weak self] index in
+            guard let self, let activeSession = self.sessionManager.activeSession else {
+                return URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("temp.m4a")
+            }
+            return self.sessionManager.chunkURL(for: activeSession, index: index)
+        }
+
+        vad.start(engine: engine)
+
+        // LifeLog 시간 업데이트 타이머
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            self.lifeLogSessionTime = (self.sessionManager.activeSession?.totalDuration ?? 0) + self.engine.currentTime
+            self.vadSilenceDuration = self.vad.silenceDuration
+        }
+    }
+
+    func stopLifeLog() {
+        vad.stop()
+        engine.stop()
+        timer?.invalidate()
+        timer = nil
+        sessionManager.finalizeSession()
+        isLifeLogActive = false
+        lifeLogSessionTime = 0
+        currentPowerLevel = -160.0
+        vadState = .active
+    }
+
+    // MARK: - RecordingEngineDelegate
+
+    func engineDidFinishChunk(url: URL, duration: TimeInterval, index: Int) {
+        sessionManager.addChunk(url: url, duration: duration, index: index)
+    }
+
+    func engineDidUpdateMeters(averagePower: Float, peakPower: Float) {
+        currentPowerLevel = averagePower
+    }
+
+    func engineDidEncounterError(_ error: Error) {
+        errorMessage = "녹음 엔진 오류: \(error.localizedDescription)"
+    }
+
+    // MARK: - VADMonitorDelegate
+
+    func vadDidDetectSilence() {
+        // 무음 감지 → 현재 청크를 silence로 마킹
+        // 녹음은 계속 유지 (미터링 위해)
+    }
+
+    func vadDidDetectVoice() {
+        // 소리 재감지 → 새 청크 시작 (무음 구간 분리)
+        engine.splitNow()
+        vad.reset()
+    }
+
+    func vadStateDidChange(_ state: VADState) {
+        vadState = state
+    }
+
+    // MARK: - AudioSessionHandlerDelegate
+
+    func audioSessionWasInterrupted() {
+        if isLifeLogActive {
+            // 전화 등 인터럽션 → 현재 청크 종료, 일시 정지 상태
+            engine.stop()
+            vad.stop()
+            timer?.invalidate()
+        }
+    }
+
+    func audioSessionInterruptionEnded(shouldResume: Bool) {
+        if isLifeLogActive && shouldResume {
+            // 인터럽션 종료 → 녹음 재개
+            guard let session = sessionManager.activeSession else { return }
+            let nextIndex = session.chunkCount
+
+            engine.start { [weak self] index in
+                guard let self, let activeSession = self.sessionManager.activeSession else {
+                    return URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("temp.m4a")
+                }
+                return self.sessionManager.chunkURL(for: activeSession, index: nextIndex + index)
+            }
+
+            vad.start(engine: engine)
+
+            timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+                guard let self else { return }
+                self.lifeLogSessionTime = (self.sessionManager.activeSession?.totalDuration ?? 0) + self.engine.currentTime
+                self.vadSilenceDuration = self.vad.silenceDuration
+            }
+        }
+    }
+
+    func audioRouteChanged(event: AudioRouteChangeEvent) {
+        // 이어폰 탈착 시 녹음은 자동으로 내장 마이크로 전환됨 (iOS 기본 동작)
+        // 별도 처리 불필요
+    }
+
+    // MARK: - Manual Recording Mode (기존 유지)
 
     func startRecording() {
         let session = AVAudioSession.sharedInstance()
         do {
-            try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
+            try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothA2DP])
             try session.setActive(true)
         } catch {
             errorMessage = "오디오 세션 설정 실패: \(error.localizedDescription)"
@@ -41,49 +173,40 @@ final class AudioRecorder {
             .replacingOccurrences(of: ":", with: "-")
         let filename = recordingsDirectory.appendingPathComponent("\(timestamp).m4a")
 
-        let settings: [String: Any] = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 44100,
-            AVNumberOfChannelsKey: 1,
-            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
-        ]
-
         do {
-            audioRecorder = try AVAudioRecorder(url: filename, settings: settings)
-            audioRecorder?.record()
+            manualRecorder = try AVAudioRecorder(url: filename, settings: RecordingEngine.manualSettings)
+            manualRecorder?.record()
             isRecording = true
             isPaused = false
             currentTime = 0
-            startTimer()
+            startManualTimer()
         } catch {
             errorMessage = "녹음 시작 실패: \(error.localizedDescription)"
         }
     }
 
     func pauseRecording() {
-        audioRecorder?.pause()
+        manualRecorder?.pause()
         isPaused = true
         timer?.invalidate()
     }
 
     func resumeRecording() {
-        audioRecorder?.record()
+        manualRecorder?.record()
         isPaused = false
-        startTimer()
+        startManualTimer()
     }
 
     func stopRecording() {
-        guard let recorder = audioRecorder else { return }
+        guard let recorder = manualRecorder else { return }
         let url = recorder.url
         recorder.stop()
         timer?.invalidate()
         isRecording = false
         isPaused = false
         currentTime = 0
-        audioRecorder = nil
+        manualRecorder = nil
         loadRecordings()
-
-        // 자동 STT 변환
         transcribe(url: url)
     }
 
@@ -118,9 +241,11 @@ final class AudioRecorder {
             .sorted { $0.date > $1.date }
     }
 
-    private func startTimer() {
+    // MARK: - Private (Manual Mode)
+
+    private func startManualTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            guard let self, let recorder = self.audioRecorder else { return }
+            guard let self, let recorder = self.manualRecorder else { return }
             self.currentTime = recorder.currentTime
         }
     }
@@ -134,7 +259,6 @@ final class AudioRecorder {
                 return
             }
 
-            // 한국어 인식기 (fallback: 기기 기본 언어)
             let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "ko-KR"))
                 ?? SFSpeechRecognizer()
 
