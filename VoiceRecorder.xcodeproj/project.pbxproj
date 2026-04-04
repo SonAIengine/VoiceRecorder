@@ -76,9 +76,9 @@
 		A0A55AACF9FECC73E6AC2EB4 /* Chunk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chunk.swift; sourceTree = "<group>"; };
 		A5003381475B394E8EBEF935 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		B273B2D8EA31CFBA6F534C20 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		B76493C364D76AB3D7C12699 /* SonLifeWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SonLifeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B76493C364D76AB3D7C12699 /* SonLifeWidgetExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = SonLifeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C029FE53DE4689166B71E535 /* ChunkUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChunkUploader.swift; sourceTree = "<group>"; };
-		C4427EA2D62266B0A6401BB4 /* VoiceRecorder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceRecorder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4427EA2D62266B0A6401BB4 /* VoiceRecorder.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = VoiceRecorder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBFE314F2974FCA2E6FBB14B /* LifeLogControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeLogControlView.swift; sourceTree = "<group>"; };
 		E57B3BACE5082BB3A45CA965 /* RecordingEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingEngine.swift; sourceTree = "<group>"; };
 		EA14F9A81627DA543FC92716 /* AudioSessionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSessionHandler.swift; sourceTree = "<group>"; };
@@ -221,6 +221,14 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					896274D5B9616EF09D3DCDBD = {
+						DevelopmentTeam = XMF443BPZ9;
+					};
+					D98741633B77D83B869CB50B = {
+						DevelopmentTeam = XMF443BPZ9;
+					};
+				};
 			};
 			buildConfigurationList = 5404FD4F32CAA00BED698525 /* Build configuration list for PBXProject "VoiceRecorder" */;
 			developmentRegion = en;
@@ -415,7 +423,7 @@
 				CODE_SIGN_ENTITLEMENTS = VoiceRecorder/VoiceRecorder.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ASPD4J464Z;
+				DEVELOPMENT_TEAM = XMF443BPZ9;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VoiceRecorder/Info.plist;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
@@ -506,7 +514,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = VoiceRecorder/VoiceRecorder.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ASPD4J464Z;
+				DEVELOPMENT_TEAM = XMF443BPZ9;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = SonLifeWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

@@ -10,7 +10,7 @@ schemes:
     build:
       targets:
         VoiceRecorder: all
-        SonLifeWidgetExtension: all
+        SonLifeWidgetExtension: [archive]
     run:
       config: Debug
     archive:
