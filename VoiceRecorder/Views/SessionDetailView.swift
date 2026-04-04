@@ -4,6 +4,7 @@ import AVFoundation
 struct SessionDetailView: View {
     let sessionId: UUID
     let sessionManager: SessionManager
+    var recorder: AudioRecorder?
 
     private var session: Session {
         sessionManager.activeSession?.id == sessionId
@@ -66,6 +67,33 @@ struct SessionDetailView: View {
                             }
                         )
                         .id(chunk.id)
+                    }
+
+                    // 현재 녹음 중인 청크 표시
+                    if let recorder, recorder.isLifeLogActive,
+                       sessionManager.activeSession?.id == sessionId {
+                        HStack {
+                            Image(systemName: "waveform.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.red)
+                                .symbolEffect(.pulse)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack {
+                                    Text("청크 \(recorder.currentChunkIndex + 1)")
+                                        .font(.subheadline.bold())
+                                    Text(formatChunkTime(recorder.currentChunkTime))
+                                        .font(.caption.monospaced())
+                                        .foregroundStyle(.secondary)
+                                }
+                                Text("녹음 중...")
+                                    .font(.caption)
+                                    .foregroundStyle(.red)
+                            }
+
+                            Spacer()
+                        }
+                        .padding(.vertical, 4)
                     }
                 }
             }
@@ -293,6 +321,12 @@ struct SessionDetailView: View {
 
     private enum SyncStatus {
         case idle, syncing, success, failure
+    }
+
+    private func formatChunkTime(_ seconds: TimeInterval) -> String {
+        let m = Int(seconds) / 60
+        let s = Int(seconds) % 60
+        return String(format: "%d:%02d / 5:00", m, s)
     }
 
     private func formatDuration(_ seconds: TimeInterval) -> String {

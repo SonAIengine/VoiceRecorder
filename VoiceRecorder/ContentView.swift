@@ -73,7 +73,7 @@ struct LifeLogView: View {
             LifeLogControlView(recorder: recorder)
                 .padding(.top, 8)
 
-            SessionListView(sessionManager: recorder.sessionManager)
+            SessionListView(sessionManager: recorder.sessionManager, recorder: recorder)
         }
         .navigationTitle("LifeLog")
         .navigationBarTitleDisplayMode(.inline)

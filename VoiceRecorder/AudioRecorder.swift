@@ -20,6 +20,8 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
     var vadState: VADState = .active
     var vadSilenceDuration: TimeInterval = 0
     var vadSilenceTimeout: TimeInterval { vad.silenceTimeoutSeconds }
+    var currentChunkTime: TimeInterval { engine.currentTime }
+    var currentChunkIndex: Int { engine.currentChunkIndex }
 
     // Components
     private let engine = RecordingEngine()

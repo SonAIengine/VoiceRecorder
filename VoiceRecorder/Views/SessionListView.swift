@@ -2,12 +2,13 @@ import SwiftUI
 
 struct SessionListView: View {
     let sessionManager: SessionManager
+    var recorder: AudioRecorder?
 
     var body: some View {
         List {
             ForEach(sessionManager.sessions) { session in
                 NavigationLink {
-                    SessionDetailView(sessionId: session.id, sessionManager: sessionManager)
+                    SessionDetailView(sessionId: session.id, sessionManager: sessionManager, recorder: recorder)
                 } label: {
                     SessionRow(session: session)
                 }
