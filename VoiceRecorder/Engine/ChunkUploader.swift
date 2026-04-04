@@ -178,13 +178,21 @@ final class ChunkUploader {
                 }
             }
 
-            chunksPayload.append([
+            var chunkDict: [String: Any] = [
                 "start_time": startTime,
                 "end_time": endTime,
                 "duration": chunk.duration,
                 "text": chunk.transcript ?? "",
                 "segments": segmentsPayload,
-            ])
+            ]
+            if let loc = chunk.location {
+                chunkDict["location"] = [
+                    "latitude": loc.latitude,
+                    "longitude": loc.longitude,
+                    "placemark": loc.placemark ?? "",
+                ]
+            }
+            chunksPayload.append(chunkDict)
         }
 
         let llmProvider = UserDefaults.standard.string(forKey: "llm_provider") ?? "off"

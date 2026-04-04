@@ -1,5 +1,11 @@
 import Foundation
 
+struct ChunkLocation: Codable {
+    let latitude: Double
+    let longitude: Double
+    var placemark: String?
+}
+
 struct Chunk: Identifiable, Codable {
     let id: UUID
     let sessionId: UUID
@@ -9,6 +15,7 @@ struct Chunk: Identifiable, Codable {
     var isSilence: Bool
     var transcript: String?
     var segments: [TranscriptSegment]?
+    var location: ChunkLocation?
 
     struct TranscriptSegment: Codable {
         let start: Double
@@ -26,7 +33,7 @@ struct Chunk: Identifiable, Codable {
             .appendingPathComponent(filename)
     }
 
-    init(sessionId: UUID, chunkIndex: Int, startDate: Date = Date()) {
+    init(sessionId: UUID, chunkIndex: Int, startDate: Date = Date(), location: ChunkLocation? = nil) {
         self.id = UUID()
         self.sessionId = sessionId
         self.chunkIndex = chunkIndex
@@ -35,5 +42,6 @@ struct Chunk: Identifiable, Codable {
         self.isSilence = false
         self.transcript = nil
         self.segments = nil
+        self.location = location
     }
 }

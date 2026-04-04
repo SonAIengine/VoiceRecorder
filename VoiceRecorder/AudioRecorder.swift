@@ -25,6 +25,7 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
     private let vad = VADMonitor()
     let sessionManager = SessionManager()
     private let audioSessionHandler = AudioSessionHandler()
+    private let locationTracker = LocationTracker()
 
     // Manual mode internals
     private var manualRecorder: AVAudioRecorder?
@@ -95,6 +96,8 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
         let session = sessionManager.startSession()
         isLifeLogActive = true
         lifeLogSessionTime = 0
+        locationTracker.requestPermission()
+        locationTracker.startTracking()
 
         engine.start(urlProvider: { [weak self] index in
             guard let self, let activeSession = self.sessionManager.activeSession else {
@@ -110,6 +113,7 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
     func stopLifeLog() {
         vad.stop()
         engine.stop()
+        locationTracker.stopTracking()
         timer?.invalidate()
         timer = nil
 
@@ -149,7 +153,8 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
     func engineDidFinishChunk(url: URL, duration: TimeInterval, index: Int, startDate: Date) {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            self.sessionManager.addChunk(url: url, duration: duration, index: index, startDate: startDate)
+            let location = self.locationTracker.currentChunkLocation()
+            self.sessionManager.addChunk(url: url, duration: duration, index: index, startDate: startDate, location: location)
 
             // VAD에 의한 무음 청크 마킹
             if self.markNextChunkAsSilence {

@@ -31,9 +31,9 @@ final class SessionManager {
         return session
     }
 
-    func addChunk(url: URL, duration: TimeInterval, index: Int, startDate: Date) {
+    func addChunk(url: URL, duration: TimeInterval, index: Int, startDate: Date, location: ChunkLocation? = nil) {
         guard var session = activeSession else { return }
-        var chunk = Chunk(sessionId: session.id, chunkIndex: index, startDate: startDate)
+        var chunk = Chunk(sessionId: session.id, chunkIndex: index, startDate: startDate, location: location)
         chunk.duration = duration
         session.chunks.append(chunk)
         activeSession = session

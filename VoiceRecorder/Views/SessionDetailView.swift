@@ -274,6 +274,14 @@ struct ChunkRow: View {
                                 .font(.caption)
                                 .foregroundStyle(.orange)
                         }
+                        if let placemark = chunk.location?.placemark {
+                            HStack(spacing: 2) {
+                                Image(systemName: "location.fill")
+                                Text(placemark)
+                            }
+                            .font(.caption2)
+                            .foregroundStyle(.blue)
+                        }
                     }
 
                     if !isExpanded, let transcript = chunk.transcript, !transcript.isEmpty {
