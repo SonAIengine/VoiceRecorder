@@ -66,59 +66,34 @@ final class ChunkUploader {
         let boundary = UUID().uuidString
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
-        // multipart body를 임시 파일에 스트림으로 작성 (메모리 절약)
-        let tmpBodyURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("\(boundary).body")
-        guard let outputStream = OutputStream(url: tmpBodyURL, append: false) else {
+        guard let fileData = try? Data(contentsOf: fileURL) else {
             completion(nil)
             return
         }
-        outputStream.open()
-        defer {
-            outputStream.close()
-            try? FileManager.default.removeItem(at: tmpBodyURL)
-        }
 
-        func write(_ string: String) {
-            let data = string.data(using: .utf8)!
-            _ = data.withUnsafeBytes { outputStream.write($0.bindMemory(to: UInt8.self).baseAddress!, maxLength: data.count) }
-        }
-
-        // file part — 청크 단위로 복사
-        write("--\(boundary)\r\n")
-        write("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileURL.lastPathComponent)\"\r\n")
-        write("Content-Type: audio/mp4\r\n\r\n")
-
-        guard let inputStream = InputStream(url: fileURL) else {
-            completion(nil)
-            return
-        }
-        inputStream.open()
-        let bufferSize = 64 * 1024
-        var buffer = [UInt8](repeating: 0, count: bufferSize)
-        while inputStream.hasBytesAvailable {
-            let bytesRead = inputStream.read(&buffer, maxLength: bufferSize)
-            if bytesRead > 0 {
-                outputStream.write(buffer, maxLength: bytesRead)
-            }
-        }
-        inputStream.close()
-
-        write("\r\n")
+        var body = Data()
+        // file part
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileURL.lastPathComponent)\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: audio/mp4\r\n\r\n".data(using: .utf8)!)
+        body.append(fileData)
+        body.append("\r\n".data(using: .utf8)!)
         // enable_diarization part
-        write("--\(boundary)\r\n")
-        write("Content-Disposition: form-data; name=\"enable_diarization\"\r\n\r\n")
-        write("true\r\n")
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"enable_diarization\"\r\n\r\n".data(using: .utf8)!)
+        body.append("true\r\n".data(using: .utf8)!)
         // initial_prompt
         let vocabulary = UserDefaults.standard.string(forKey: "stt_vocabulary") ?? ""
         if !vocabulary.isEmpty {
-            write("--\(boundary)\r\n")
-            write("Content-Disposition: form-data; name=\"initial_prompt\"\r\n\r\n")
-            write("\(vocabulary)\r\n")
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"initial_prompt\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(vocabulary)\r\n".data(using: .utf8)!)
         }
-        write("--\(boundary)--\r\n")
-        outputStream.close()
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
 
-        let task = session.uploadTask(with: request, fromFile: tmpBodyURL) { data, response, error in
+        request.httpBody = body
+
+        let task = session.dataTask(with: request) { data, response, error in
             if let error {
                 print("[ChunkUploader] Upload failed: \(error.localizedDescription)")
                 self.addToPending(fileURL: fileURL, sessionId: sessionId, chunkIndex: chunkIndex)
