@@ -185,12 +185,13 @@ final class ChunkUploader {
 
     // MARK: - Retry Queue
 
-    private func addToPending(fileURL: URL, sessionId: String, chunkIndex: Int) {
+    private func addToPending(fileURL: URL, sessionId: String, chunkIndex: Int, retryCount: Int = 0) {
         queue.async {
             let pending = PendingUpload(
                 fileURL: fileURL.path,
                 sessionId: sessionId,
-                chunkIndex: chunkIndex
+                chunkIndex: chunkIndex,
+                retryCount: retryCount
             )
             self.pendingUploads.append(pending)
             self.savePendingUploads()
@@ -220,6 +221,13 @@ final class ChunkUploader {
                 self.upload(fileURL: fileURL, sessionId: upload.sessionId, chunkIndex: upload.chunkIndex) { result in
                     if result != nil {
                         successCount += 1
+                    } else {
+                        self.addToPending(
+                            fileURL: fileURL,
+                            sessionId: upload.sessionId,
+                            chunkIndex: upload.chunkIndex,
+                            retryCount: upload.retryCount + 1
+                        )
                     }
                     group.leave()
                 }

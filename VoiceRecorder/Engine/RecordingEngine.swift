@@ -19,6 +19,7 @@ final class RecordingEngine {
     private var chunkDuration: TimeInterval
     private var audioSettings: [String: Any]
     private var urlProvider: ((Int) -> URL)?
+    private var isSplitting = false
 
     static let lifeLogSettings: [String: Any] = [
         AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -80,6 +81,10 @@ final class RecordingEngine {
     }
 
     func splitNow() {
+        guard !isSplitting else { return }
+        isSplitting = true
+        defer { isSplitting = false }
+
         let nextIndex = currentChunkIndex + 1
         finalizeCurrentChunk()
         startChunk(index: nextIndex)
@@ -122,34 +127,9 @@ final class RecordingEngine {
     }
 
     private func checkChunkSplit() {
-        guard let recorder = currentRecorder else { return }
+        guard let recorder = currentRecorder, !isSplitting else { return }
         if recorder.currentTime >= chunkDuration {
-            let nextIndex = currentChunkIndex + 1
-            guard let urlProvider else { return }
-            let nextURL = urlProvider(nextIndex)
-
-            do {
-                let next = try AVAudioRecorder(url: nextURL, settings: audioSettings)
-                next.isMeteringEnabled = true
-                next.prepareToRecord()
-                next.record()
-
-                let duration = recorder.currentTime
-                let url = currentChunkURL
-                let startTime = currentChunkStartTime
-                recorder.stop()
-
-                if duration > 0.5, let url, let startTime {
-                    delegate?.engineDidFinishChunk(url: url, duration: duration, index: currentChunkIndex, startDate: startTime)
-                }
-
-                currentRecorder = next
-                currentChunkURL = nextURL
-                currentChunkStartTime = Date()
-                currentChunkIndex = nextIndex
-            } catch {
-                delegate?.engineDidEncounterError(error)
-            }
+            splitNow()
         }
     }
 

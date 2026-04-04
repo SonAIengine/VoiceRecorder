@@ -1,4 +1,5 @@
 import AVFoundation
+import Network
 import Speech
 import UIKit
 
@@ -28,6 +29,9 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
     private var manualRecorder: AVAudioRecorder?
     private var timer: Timer?
     private let fileManager = FileManager.default
+    private var markNextChunkAsSilence = false
+    private let networkMonitor = NWPathMonitor()
+    private var wasDisconnected = false
 
     let recordingsDirectory: URL
 
@@ -41,6 +45,8 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
         audioSessionHandler.delegate = self
         loadRecordings()
         observeAppLifecycle()
+        startNetworkMonitor()
+        retryPendingUploads()
     }
 
     // MARK: - App Lifecycle (#9)
@@ -69,7 +75,7 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
 
     private func handleAppResignActive() {
         // 백그라운드 진입 시 세션 메타데이터 즉시 저장 (강제 종료 대비)
-        if isLifeLogActive, let session = sessionManager.activeSession {
+        if isLifeLogActive, sessionManager.activeSession != nil {
             sessionManager.saveCurrentState()
         }
     }
@@ -143,6 +149,13 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
             guard let self else { return }
             self.sessionManager.addChunk(url: url, duration: duration, index: index, startDate: startDate)
 
+            // VAD에 의한 무음 청크 마킹
+            if self.markNextChunkAsSilence {
+                self.sessionManager.markChunkAsSilence(index: index)
+                self.markNextChunkAsSilence = false
+                return // 무음 청크는 STT 업로드 스킵
+            }
+
             // 자동 STT 업로드
             guard let session = self.sessionManager.activeSession else { return }
             let sessionId = session.id.uuidString
@@ -178,10 +191,14 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
     // MARK: - VADMonitorDelegate (#5 메인 스레드 보장)
 
     func vadDidDetectSilence() {
-        // 무음 감지 → 녹음 계속 유지 (미터링 위해)
+        // 무음 30초 도달 → 즉시 청크 분리하여 무음 구간 격리
+        markNextChunkAsSilence = true
+        engine.splitNow()
     }
 
     func vadDidDetectVoice() {
+        // 음성 재감지 → 무음 청크 분리 후 새 청크 시작
+        markNextChunkAsSilence = true
         engine.splitNow()
         vad.reset()
     }
@@ -220,7 +237,15 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
     }
 
     func audioRouteChanged(event: AudioRouteChangeEvent) {
-        // iOS가 자동으로 내장 마이크로 전환
+        switch event {
+        case .headphonesDisconnected:
+            // 이어폰 해제 시 내장 마이크로 자동 전환 — 세션 재설정으로 안정성 확보
+            if isLifeLogActive {
+                try? audioSessionHandler.configure()
+            }
+        case .headphonesConnected:
+            break
+        }
     }
 
     // MARK: - Manual Recording Mode
@@ -305,6 +330,33 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
                 return Recording(url: url, date: date, transcript: transcript)
             }
             .sorted { $0.date > $1.date }
+    }
+
+    // MARK: - Network Monitor
+
+    private func startNetworkMonitor() {
+        networkMonitor.pathUpdateHandler = { [weak self] path in
+            guard let self else { return }
+            if path.status == .satisfied && self.wasDisconnected {
+                self.wasDisconnected = false
+                DispatchQueue.main.async {
+                    self.retryPendingUploads()
+                }
+            } else if path.status != .satisfied {
+                self.wasDisconnected = true
+            }
+        }
+        networkMonitor.start(queue: DispatchQueue(label: "com.sonaiengine.voicerecorder.network"))
+    }
+
+    // MARK: - Retry Queue
+
+    private func retryPendingUploads() {
+        ChunkUploader.shared.retryPendingUploads { count in
+            if count > 0 {
+                print("[LifeLog] \(count)개 pending 청크 업로드 성공")
+            }
+        }
     }
 
     // MARK: - Private

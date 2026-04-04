@@ -74,7 +74,7 @@ struct SessionDetailView: View {
         }
 
         stopPlayback()
-        let url = chunk.url(in: sessionManager.sessionsDirectory)
+        let url = chunk.url(in: sessionManager.sessionsDirectory.appendingPathComponent(session.id.uuidString))
 
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback)
@@ -112,7 +112,7 @@ struct SessionDetailView: View {
 
     private func shareSession() {
         let urls = session.chunks.compactMap { chunk -> URL? in
-            let url = chunk.url(in: sessionManager.sessionsDirectory)
+            let url = chunk.url(in: sessionManager.sessionsDirectory.appendingPathComponent(session.id.uuidString))
             return FileManager.default.fileExists(atPath: url.path) ? url : nil
         }
 

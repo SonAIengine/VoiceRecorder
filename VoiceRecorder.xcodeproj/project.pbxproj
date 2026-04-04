@@ -18,6 +18,7 @@
 		3AE0FFC15D4A940A738BB756 /* SessionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8B42937A82F09DD4CC4C36 /* SessionListView.swift */; };
 		504844835A19754B9BCAAD00 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B273B2D8EA31CFBA6F534C20 /* ContentView.swift */; };
 		505F72C40FEB3EC133E47A38 /* RecordingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B762B46CCF7B5D20C813F0E /* RecordingDetailView.swift */; };
+		60F4C7E32E73706DCFB7215F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95949CF6309E7ED410A648D6 /* SettingsView.swift */; };
 		627E487A646BC5C494423230 /* AudioSessionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA14F9A81627DA543FC92716 /* AudioSessionHandler.swift */; };
 		71778CCE1B3F4AEF4F702E64 /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E5676C2254C2D021AA2B0D /* SessionDetailView.swift */; };
 		799EA85C48779E1354A125B9 /* RecordingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57B3BACE5082BB3A45CA965 /* RecordingEngine.swift */; };
@@ -37,6 +38,7 @@
 		6E8B42937A82F09DD4CC4C36 /* SessionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListView.swift; sourceTree = "<group>"; };
 		8679F4DBA9557B1444CF6AEB /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
 		935B8F09F3F3641FE2B4625D /* VoiceRecorder.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VoiceRecorder.entitlements; sourceTree = "<group>"; };
+		95949CF6309E7ED410A648D6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A02624E5AF2E8FC45C80DBBE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A0A55AACF9FECC73E6AC2EB4 /* Chunk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chunk.swift; sourceTree = "<group>"; };
 		A5003381475B394E8EBEF935 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
@@ -72,6 +74,7 @@
 				1B762B46CCF7B5D20C813F0E /* RecordingDetailView.swift */,
 				46E5676C2254C2D021AA2B0D /* SessionDetailView.swift */,
 				6E8B42937A82F09DD4CC4C36 /* SessionListView.swift */,
+				95949CF6309E7ED410A648D6 /* SettingsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -198,6 +201,7 @@
 				71778CCE1B3F4AEF4F702E64 /* SessionDetailView.swift in Sources */,
 				3AE0FFC15D4A940A738BB756 /* SessionListView.swift in Sources */,
 				08375C101727EA58F96732AE /* SessionManager.swift in Sources */,
+				60F4C7E32E73706DCFB7215F /* SettingsView.swift in Sources */,
 				D09B885F943E1B52637ACBAD /* VADMonitor.swift in Sources */,
 				06D6D80033C99B5704C5F545 /* VoiceRecorderApp.swift in Sources */,
 			);

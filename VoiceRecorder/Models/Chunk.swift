@@ -21,9 +21,8 @@ struct Chunk: Identifiable, Codable {
         String(format: "chunk-%03d.m4a", chunkIndex)
     }
 
-    func url(in baseDirectory: URL) -> URL {
-        baseDirectory
-            .appendingPathComponent(sessionId.uuidString)
+    func url(in sessionDirectory: URL) -> URL {
+        sessionDirectory
             .appendingPathComponent(filename)
     }
 
