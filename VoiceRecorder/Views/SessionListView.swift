@@ -7,7 +7,7 @@ struct SessionListView: View {
         List {
             ForEach(sessionManager.sessions) { session in
                 NavigationLink {
-                    SessionDetailView(session: session, sessionManager: sessionManager)
+                    SessionDetailView(sessionId: session.id, sessionManager: sessionManager)
                 } label: {
                     SessionRow(session: session)
                 }

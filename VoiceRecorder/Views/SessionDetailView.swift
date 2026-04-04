@@ -2,8 +2,15 @@ import SwiftUI
 import AVFoundation
 
 struct SessionDetailView: View {
-    let session: Session
+    let sessionId: UUID
     let sessionManager: SessionManager
+
+    private var session: Session {
+        sessionManager.activeSession?.id == sessionId
+            ? sessionManager.activeSession!
+            : sessionManager.sessions.first(where: { $0.id == sessionId })
+                ?? Session(id: sessionId)
+    }
     @State private var player: AVAudioPlayer?
     @State private var isPlaying = false
     @State private var playingChunkIndex: Int?
