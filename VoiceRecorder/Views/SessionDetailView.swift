@@ -12,6 +12,8 @@ struct SessionDetailView: View {
     @State private var timer: Timer?
     @State private var syncStatus: SyncStatus = .idle
     @State private var expandedChunkIndex: Int?
+    @State private var renamingSpeaker: String?
+    @State private var speakerNewName: String = ""
 
     var body: some View {
         ScrollViewReader { listProxy in
@@ -36,7 +38,12 @@ struct SessionDetailView: View {
                             isPlaying: isChunkPlaying,
                             isExpanded: expandedChunkIndex == chunk.chunkIndex,
                             playbackTime: isChunkPlaying ? playbackTime : nil,
+                            speakerNames: session.speakerNames,
                             onPlayTap: { toggleChunkPlayback(chunk) },
+                            onSpeakerTap: { speakerId in
+                                speakerNewName = session.speakerNames[speakerId] ?? ""
+                                renamingSpeaker = speakerId
+                            },
                             onExpandTap: {
                                 let newIndex = expandedChunkIndex == chunk.chunkIndex ? nil : chunk.chunkIndex
                                 withAnimation {
@@ -85,6 +92,28 @@ struct SessionDetailView: View {
                         Image(systemName: "square.and.arrow.up")
                     }
                 }
+            }
+        }
+        .alert("화자 이름 지정", isPresented: .init(
+            get: { renamingSpeaker != nil },
+            set: { if !$0 { renamingSpeaker = nil } }
+        )) {
+            TextField("이름", text: $speakerNewName)
+            Button("저장") {
+                if let speakerId = renamingSpeaker {
+                    sessionManager.updateSpeakerName(
+                        sessionId: session.id,
+                        speakerId: speakerId,
+                        name: speakerNewName
+                    )
+                    sessionManager.loadAllSessions()
+                }
+                renamingSpeaker = nil
+            }
+            Button("취소", role: .cancel) { renamingSpeaker = nil }
+        } message: {
+            if let speakerId = renamingSpeaker {
+                Text("\(speakerId)의 이름을 입력하세요")
             }
         }
         .onDisappear {
@@ -238,8 +267,14 @@ struct ChunkRow: View {
     let isPlaying: Bool
     let isExpanded: Bool
     var playbackTime: TimeInterval?
+    var speakerNames: [String: String] = [:]
     let onPlayTap: () -> Void
+    var onSpeakerTap: ((String) -> Void)?
     let onExpandTap: () -> Void
+
+    private func displayName(for speakerId: String) -> String {
+        speakerNames[speakerId] ?? speakerId
+    }
 
     private func isSegmentActive(_ seg: Chunk.TranscriptSegment) -> Bool {
         guard let time = playbackTime else { return false }
@@ -312,10 +347,13 @@ struct ChunkRow: View {
                             ForEach(Array(segments.enumerated()), id: \.offset) { idx, seg in
                                 HStack(alignment: .top, spacing: 8) {
                                     if let speaker = seg.speaker {
-                                        Text(speaker)
+                                        Text(displayName(for: speaker))
                                             .font(.caption2.bold())
                                             .foregroundStyle(isSegmentActive(seg) ? .white : .blue)
                                             .frame(width: 80, alignment: .leading)
+                                            .onTapGesture {
+                                                onSpeakerTap?(speaker)
+                                            }
                                     }
                                     Text(seg.text)
                                         .font(.callout)

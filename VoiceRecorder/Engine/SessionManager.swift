@@ -70,6 +70,19 @@ final class SessionManager {
         }
     }
 
+    func updateSpeakerName(sessionId: UUID, speakerId: String, name: String) {
+        if var session = activeSession, session.id == sessionId {
+            session.speakerNames[speakerId] = name
+            activeSession = session
+            saveSessionMetadata(session)
+            return
+        }
+        if let idx = sessions.firstIndex(where: { $0.id == sessionId }) {
+            sessions[idx].speakerNames[speakerId] = name
+            saveSessionMetadata(sessions[idx])
+        }
+    }
+
     func finalizeSession() {
         guard var session = activeSession else { return }
         session.status = .completed

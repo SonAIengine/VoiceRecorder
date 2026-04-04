@@ -6,6 +6,7 @@ struct Session: Identifiable, Codable {
     var endDate: Date?
     var chunks: [Chunk]
     var status: Status
+    var speakerNames: [String: String] = [:]  // "SPEAKER_00" → "김교수"
 
     enum Status: String, Codable {
         case recording

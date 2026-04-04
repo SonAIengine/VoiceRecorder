@@ -201,6 +201,9 @@ final class ChunkUploader {
             "session_date": sessionDate,
             "chunks": chunksPayload,
         ]
+        if !session.speakerNames.isEmpty {
+            body["speaker_names"] = session.speakerNames
+        }
         if llmProvider != "off" {
             body["llm_provider"] = llmProvider
         }
