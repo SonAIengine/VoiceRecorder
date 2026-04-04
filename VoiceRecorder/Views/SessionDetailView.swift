@@ -100,13 +100,15 @@ struct SessionDetailView: View {
         )) {
             TextField("이름", text: $speakerNewName)
             Button("저장") {
-                if let speakerId = renamingSpeaker {
+                if let speakerId = renamingSpeaker, !speakerNewName.isEmpty {
                     sessionManager.updateSpeakerName(
                         sessionId: session.id,
                         speakerId: speakerId,
                         name: speakerNewName
                     )
                     sessionManager.loadAllSessions()
+                    // 서버에 화자 등록 (embedding DB)
+                    registerSpeakerOnServer(speakerId: speakerId, name: speakerNewName)
                 }
                 renamingSpeaker = nil
             }
@@ -245,6 +247,41 @@ struct SessionDetailView: View {
                 }
             }
         }
+    }
+
+    private func registerSpeakerOnServer(speakerId: String, name: String) {
+        guard let chunk = session.chunks.first(where: { $0.transcript != nil && !$0.isSilence }) else { return }
+        let sessionDir = sessionManager.sessionsDirectory.appendingPathComponent(session.id.uuidString)
+        let audioURL = chunk.url(in: sessionDir)
+        guard FileManager.default.fileExists(atPath: audioURL.path),
+              let fileData = try? Data(contentsOf: audioURL) else { return }
+
+        let serverURL = ChunkUploader.shared.currentServerURL
+        guard let endpoint = URL(string: serverURL)?.appendingPathComponent("api/speakers/register-from-audio") else { return }
+
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 120
+
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        var body = Data()
+        body.append("--\(boundary)\r\nContent-Disposition: form-data; name=\"name\"\r\n\r\n\(name)\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)\r\nContent-Disposition: form-data; name=\"speaker_label\"\r\n\r\n\(speakerId)\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)\r\nContent-Disposition: form-data; name=\"file\"; filename=\"\(audioURL.lastPathComponent)\"\r\nContent-Type: audio/mp4\r\n\r\n".data(using: .utf8)!)
+        body.append(fileData)
+        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+
+        request.httpBody = body
+
+        URLSession.shared.dataTask(with: request) { _, _, error in
+            if let error {
+                print("[SpeakerRegister] 등록 실패: \(error.localizedDescription)")
+            } else {
+                print("[SpeakerRegister] \(name) 등록 완료")
+            }
+        }.resume()
     }
 
     private enum SyncStatus {
