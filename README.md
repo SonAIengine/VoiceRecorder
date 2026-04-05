@@ -62,6 +62,12 @@ SonLife 생태계의 사용자 인터페이스 레이어. 현재는 **음성 녹
 - APNs 푸시 알림
 - 응답 히스토리
 
+**진행 중 (서버측 완료)**:
+- **H3-A 피드백 UI**: APNs 푸시 수신 → 요약 피드백 화면 → synaptic-memory 강화
+  - 통합 가이드: [docs/H3-A-APNs-Feedback.md](docs/H3-A-APNs-Feedback.md)
+  - 서버 API 준비 완료 (`POST /api/devices/register`, `POST /api/feedback`)
+  - iOS 앱 작업 필요: UNUserNotificationCenter 등록 + FeedbackView
+
 ### Phase 5 — 자동화 규칙 엔진
 - 사용자 정의 규칙 ("주말에 받은 메일은 자동 요약")
 - 규칙 편집 UI
