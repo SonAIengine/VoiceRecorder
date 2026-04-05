@@ -9,7 +9,7 @@ SonLife 서버의 하네스(H3-A)에 연결하기 위한 iOS 앱 변경사항.
 ### 1. Apple Developer Portal 작업 (한 번만)
 
 1. https://developer.apple.com/account → Certificates, Identifiers & Profiles
-2. **App ID**: `com.sonaiengine.voicerecorder` 확인 → **Push Notifications capability 활성화**
+2. **App ID**: `com.sonaiengine.sonlifeapp` 확인 → **Push Notifications capability 활성화**
 3. **Keys** → `+` → **Apple Push Notifications service (APNs)** 체크 → Continue
 4. 생성된 `.p8` 파일 다운로드 (한 번만 가능)
 5. **Key ID (10자)** 복사
@@ -22,7 +22,7 @@ SonLife 서버의 하네스(H3-A)에 연결하기 위한 iOS 앱 변경사항.
 APNS_KEY_PATH=/home/son/.secrets/AuthKey_XXXXXXXXXX.p8
 APNS_KEY_ID=XXXXXXXXXX
 APNS_TEAM_ID=XMF443BPZ9
-APNS_BUNDLE_ID=com.sonaiengine.voicerecorder
+APNS_BUNDLE_ID=com.sonaiengine.sonlifeapp
 APNS_USE_SANDBOX=1
 ```
 
@@ -30,7 +30,7 @@ APNS_USE_SANDBOX=1
 
 ## iOS 앱 변경사항
 
-### 1. `VoiceRecorder/Info.plist`
+### 1. `SonlifeApp/Info.plist`
 
 ```xml
 <!-- 기존 키들 유지 + 추가 -->
@@ -41,7 +41,7 @@ APNS_USE_SANDBOX=1
 </array>
 ```
 
-### 2. `VoiceRecorder/VoiceRecorder.entitlements`
+### 2. `SonlifeApp/SonlifeApp.entitlements`
 
 ```xml
 <!-- 기존 유지 + 추가 -->
@@ -49,14 +49,14 @@ APNS_USE_SANDBOX=1
 <string>development</string>  <!-- 배포 시 production -->
 ```
 
-### 3. `VoiceRecorder/VoiceRecorderApp.swift`
+### 3. `SonlifeApp/SonlifeAppApp.swift`
 
 ```swift
 import SwiftUI
 import UserNotifications
 
 @main
-struct VoiceRecorderApp: App {
+struct SonlifeAppApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     var body: some Scene {
@@ -127,7 +127,7 @@ extension Notification.Name {
 }
 ```
 
-### 4. `VoiceRecorder/Engine/FeedbackService.swift` (신규)
+### 4. `SonlifeApp/Engine/FeedbackService.swift` (신규)
 
 ```swift
 import Foundation
@@ -199,7 +199,7 @@ enum FeedbackService {
 }
 ```
 
-### 5. `VoiceRecorder/Views/FeedbackView.swift` (신규)
+### 5. `SonlifeApp/Views/FeedbackView.swift` (신규)
 
 Apple HIG 스타일 — SF Symbols + `.borderedProminent` / `.bordered` 버튼.
 
@@ -316,7 +316,7 @@ struct FeedbackView: View {
 - `safeAreaInset(edge: .bottom)`: 하단 고정, 스크롤과 분리
 - SF Symbols로 텍스트-아이콘 조합 (이모지 대신)
 
-### 6. `VoiceRecorder/ContentView.swift` 수정
+### 6. `SonlifeApp/ContentView.swift` 수정
 
 ```swift
 struct ContentView: View {
@@ -354,7 +354,7 @@ cd /home/son/projects/app/sonlife-app
 xcodegen generate
 
 # 2. Xcode에서 빌드
-open VoiceRecorder.xcodeproj
+open SonlifeApp.xcodeproj
 ```
 
 Xcode에서:

@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct VoiceRecorderApp: App {
+struct SonlifeAppApp: App {
     @AppStorage("appTheme") private var selectedTheme: String = AppTheme.system.rawValue
 
     var body: some Scene {

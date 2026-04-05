@@ -19,7 +19,7 @@ final class ChunkUploader {
 
     private let session: URLSession
     private var serverURL: URL
-    private let queue = DispatchQueue(label: "com.sonaiengine.voicerecorder.uploader")
+    private let queue = DispatchQueue(label: "com.sonaiengine.sonlifeapp.uploader")
     private var pendingUploads: [PendingUpload] = []
     private var isProcessing = false
 

@@ -421,7 +421,7 @@ final class AudioRecorder: RecordingEngineDelegate, VADMonitorDelegate, AudioSes
                 self.wasDisconnected = true
             }
         }
-        networkMonitor.start(queue: DispatchQueue(label: "com.sonaiengine.voicerecorder.network"))
+        networkMonitor.start(queue: DispatchQueue(label: "com.sonaiengine.sonlifeapp.network"))
     }
 
     // MARK: - Retry Queue

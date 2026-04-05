@@ -15,10 +15,10 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "896274D5B9616EF09D3DCDBD"
+               BlueprintIdentifier = "A902A63259F343B5739A1F7A"
                BuildableName = "SonLifeWidgetExtension.appex"
                BlueprintName = "SonLifeWidgetExtension"
-               ReferencedContainer = "container:VoiceRecorder.xcodeproj">
+               ReferencedContainer = "container:SonlifeApp.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -29,10 +29,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D98741633B77D83B869CB50B"
-               BuildableName = "VoiceRecorder.app"
-               BlueprintName = "VoiceRecorder"
-               ReferencedContainer = "container:VoiceRecorder.xcodeproj">
+               BlueprintIdentifier = "005CC89A07342BD79A0E7F7B"
+               BuildableName = "SonlifeApp.app"
+               BlueprintName = "SonlifeApp"
+               ReferencedContainer = "container:SonlifeApp.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -46,10 +46,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D98741633B77D83B869CB50B"
-            BuildableName = "VoiceRecorder.app"
-            BlueprintName = "VoiceRecorder"
-            ReferencedContainer = "container:VoiceRecorder.xcodeproj">
+            BlueprintIdentifier = "005CC89A07342BD79A0E7F7B"
+            BuildableName = "SonlifeApp.app"
+            BlueprintName = "SonlifeApp"
+            ReferencedContainer = "container:SonlifeApp.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -69,10 +69,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D98741633B77D83B869CB50B"
-            BuildableName = "VoiceRecorder.app"
-            BlueprintName = "VoiceRecorder"
-            ReferencedContainer = "container:VoiceRecorder.xcodeproj">
+            BlueprintIdentifier = "005CC89A07342BD79A0E7F7B"
+            BuildableName = "SonlifeApp.app"
+            BlueprintName = "SonlifeApp"
+            ReferencedContainer = "container:SonlifeApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -88,10 +88,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D98741633B77D83B869CB50B"
-            BuildableName = "VoiceRecorder.app"
-            BlueprintName = "VoiceRecorder"
-            ReferencedContainer = "container:VoiceRecorder.xcodeproj">
+            BlueprintIdentifier = "005CC89A07342BD79A0E7F7B"
+            BuildableName = "SonlifeApp.app"
+            BlueprintName = "SonlifeApp"
+            ReferencedContainer = "container:SonlifeApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -82,7 +82,7 @@ SonLife 생태계의 사용자 인터페이스 레이어. 현재는 **음성 녹
 ## 기술 스택
 
 - **iOS 17.0+**, Swift 5.9, SwiftUI, @Observable
-- **Bundle ID**: com.sonaiengine.voicerecorder (→ com.sonaiengine.sonlife 변경 예정)
+- **Bundle ID**: com.sonaiengine.sonlifeapp
 - **빌드**: xcodegen + project.yml
 - **네트워킹**: URLSession (async/await)
 - **서버**: SonLife backend (FastAPI, 8100 포트)
@@ -94,7 +94,7 @@ SonLife 생태계의 사용자 인터페이스 레이어. 현재는 **음성 녹
 xcodegen generate
 
 # Xcode에서 열기
-open VoiceRecorder.xcodeproj
+open SonlifeApp.xcodeproj
 ```
 
 1. Xcode에서 Signing & Capabilities → Team에 본인 Apple 계정 선택
