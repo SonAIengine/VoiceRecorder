@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0AE7498ED86D53DC777F3A2A /* FeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0FE8065B0084985ABF09B7 /* FeedbackService.swift */; };
 		0E904D1C7D4200C3946080DC /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3280D56D2C4346301D69422E /* AudioRecorder.swift */; };
 		1019F4F6F0AACD260A883E63 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0707C82C16BCE2061E6A3A7E /* Session.swift */; };
 		1ED751D2ABCAB6C3696D186D /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B446D7DC218291750F26EDC6 /* SessionManager.swift */; };
@@ -25,6 +26,7 @@
 		A506B16BC7EC58473C56B5E6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBF2D3242875E6D8B3B2B682 /* ContentView.swift */; };
 		A6793520B5E5D42E4B57D55F /* VADMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34A7C1D1FEBF929706E704C3 /* VADMonitor.swift */; };
 		B3A43A5532CE0AC5F7B6D78F /* RecordingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B901045F6314E749FB9EC43 /* RecordingDetailView.swift */; };
+		BEF16C50CA5F79E576C2534E /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E5B886F37C125525E5494F /* FeedbackView.swift */; };
 		C0145F94FC847B40A7856441 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C9FF92FC8160EDA69262158 /* SettingsView.swift */; };
 		DBF84366AC020FC2485C409D /* SonLifeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3700A2ABDB1FEBFB10085027 /* SonLifeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EE72B5E5FF868BDB9986EAF2 /* AudioLevelMeterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6A3D1C5F04C8FA6D76CB16 /* AudioLevelMeterView.swift */; };
@@ -60,6 +62,7 @@
 /* Begin PBXFileReference section */
 		00D76B16306DF166BC8BF867 /* Recording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recording.swift; sourceTree = "<group>"; };
 		0707C82C16BCE2061E6A3A7E /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		0C0FE8065B0084985ABF09B7 /* FeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackService.swift; sourceTree = "<group>"; };
 		0C9FF92FC8160EDA69262158 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		23208DF6879E75D410F1BB90 /* SonlifeAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonlifeAppApp.swift; sourceTree = "<group>"; };
 		302D7BAD02239BFE95DA41A5 /* SessionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListView.swift; sourceTree = "<group>"; };
@@ -70,6 +73,7 @@
 		3B901045F6314E749FB9EC43 /* RecordingDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingDetailView.swift; sourceTree = "<group>"; };
 		43F81FC68E7598A35C8C7FAD /* SonLifeWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonLifeWidgetBundle.swift; sourceTree = "<group>"; };
 		455AB03D2B94AA822BDA923C /* RecordingEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingEngine.swift; sourceTree = "<group>"; };
+		50E5B886F37C125525E5494F /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
 		5C11E6D0FF4B113D6EFC45CA /* SonlifeApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SonlifeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		791141A6AD10AC5CD4F07F31 /* LocationTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTracker.swift; sourceTree = "<group>"; };
 		893BAC8D8B088C5A52B25EFA /* ChunkUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChunkUploader.swift; sourceTree = "<group>"; };
@@ -125,6 +129,7 @@
 			children = (
 				E4F0CD21F732C80869F81376 /* AudioSessionHandler.swift */,
 				893BAC8D8B088C5A52B25EFA /* ChunkUploader.swift */,
+				0C0FE8065B0084985ABF09B7 /* FeedbackService.swift */,
 				791141A6AD10AC5CD4F07F31 /* LocationTracker.swift */,
 				455AB03D2B94AA822BDA923C /* RecordingEngine.swift */,
 				B446D7DC218291750F26EDC6 /* SessionManager.swift */,
@@ -156,6 +161,7 @@
 			isa = PBXGroup;
 			children = (
 				9F6A3D1C5F04C8FA6D76CB16 /* AudioLevelMeterView.swift */,
+				50E5B886F37C125525E5494F /* FeedbackView.swift */,
 				3B1138EEC7185EE2E58E82A4 /* LifeLogControlView.swift */,
 				3B901045F6314E749FB9EC43 /* RecordingDetailView.swift */,
 				E6793E222635D42106BC5962 /* SessionDetailView.swift */,
@@ -272,6 +278,8 @@
 				3EC20A35FC6586E4EA67EE58 /* Chunk.swift in Sources */,
 				F91EDFFFD97622BAA12A7B13 /* ChunkUploader.swift in Sources */,
 				A506B16BC7EC58473C56B5E6 /* ContentView.swift in Sources */,
+				0AE7498ED86D53DC777F3A2A /* FeedbackService.swift in Sources */,
+				BEF16C50CA5F79E576C2534E /* FeedbackView.swift in Sources */,
 				F3D8C4C21B7A085B96ECBD84 /* LifeLogControlView.swift in Sources */,
 				4124635DDAE717AA2B8F22BE /* LocationTracker.swift in Sources */,
 				55948FA02AC8377ED5DC1411 /* Recording.swift in Sources */,
@@ -420,7 +428,7 @@
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "녹음을 위해 마이크 접근이 필요합니다.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "음성을 텍스트로 변환하기 위해 음성 인식 접근이 필요합니다.";
-				INFOPLIST_KEY_UIBackgroundModes = audio;
+				INFOPLIST_KEY_UIBackgroundModes = "audio remote-notification";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -450,7 +458,7 @@
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "녹음을 위해 마이크 접근이 필요합니다.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "음성을 텍스트로 변환하기 위해 음성 인식 접근이 필요합니다.";
-				INFOPLIST_KEY_UIBackgroundModes = audio;
+				INFOPLIST_KEY_UIBackgroundModes = "audio remote-notification";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

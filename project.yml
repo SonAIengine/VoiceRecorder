@@ -36,7 +36,7 @@ targets:
         DEVELOPMENT_TEAM: XMF443BPZ9
         INFOPLIST_KEY_NSMicrophoneUsageDescription: "녹음을 위해 마이크 접근이 필요합니다."
         INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "음성을 텍스트로 변환하기 위해 음성 인식 접근이 필요합니다."
-        INFOPLIST_KEY_UIBackgroundModes: "audio"
+        INFOPLIST_KEY_UIBackgroundModes: "audio remote-notification"
         INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace: YES
         INFOPLIST_KEY_UISupportsDocumentBrowser: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
@@ -47,6 +47,7 @@ targets:
       properties:
         com.apple.security.application-groups:
           - group.com.sonaiengine.sonlifeapp
+        aps-environment: development
     dependencies:
       - target: SonLifeWidgetExtension
 
@@ -72,3 +73,4 @@ targets:
       properties:
         com.apple.security.application-groups:
           - group.com.sonaiengine.sonlifeapp
+        aps-environment: development

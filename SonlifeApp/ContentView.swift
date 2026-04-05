@@ -6,9 +6,16 @@ enum AppMode: String, CaseIterable {
     case manual = "녹음"
 }
 
+struct FeedbackContext: Identifiable {
+    let id = UUID()
+    let sessionId: String
+    let summary: String
+}
+
 struct ContentView: View {
     @State private var recorder = AudioRecorder()
     @State private var mode: AppMode = .lifeLog
+    @State private var feedbackContext: FeedbackContext?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -59,6 +66,15 @@ struct ContentView: View {
             Button("확인") { recorder.errorMessage = nil }
         } message: {
             Text(recorder.errorMessage ?? "")
+        }
+        .sheet(item: $feedbackContext) { ctx in
+            FeedbackView(sessionId: ctx.sessionId, summaryPreview: ctx.summary)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .showFeedback)) { notif in
+            if let sessionId = notif.userInfo?["session_id"] as? String {
+                let summary = notif.userInfo?["summary"] as? String ?? ""
+                feedbackContext = FeedbackContext(sessionId: sessionId, summary: summary)
+            }
         }
     }
 }
