@@ -17,39 +17,68 @@ struct AgentDashboardView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                // Phase A — 명령 발행 버튼
-                Button {
-                    showingCommandInput = true
-                } label: {
-                    HStack {
-                        Image(systemName: "text.bubble.fill")
-                            .font(.title3)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("에이전트 명령")
+                // Phase A — 명령 + 실행 기록 진입점
+                HStack(spacing: 12) {
+                    Button {
+                        showingCommandInput = true
+                    } label: {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Image(systemName: "text.bubble.fill")
+                                .font(.title3)
+                            Text("명령")
                                 .font(.subheadline.weight(.semibold))
-                            Text("자연어로 작업 위임 (메일, 코드, 리서치...)")
-                                .font(.caption)
+                            Text("자연어로 작업 위임")
+                                .font(.caption2)
                                 .foregroundStyle(.secondary)
+                                .lineLimit(1)
                         }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                    }
-                    .padding()
-                    .background(
-                        LinearGradient(
-                            colors: [.blue.opacity(0.15), .purple.opacity(0.15)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                colors: [.blue.opacity(0.15), .purple.opacity(0.15)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                        }
+                        .foregroundStyle(.primary)
                     }
-                    .foregroundStyle(.primary)
+                    .buttonStyle(.plain)
+
+                    NavigationLink {
+                        OrchestratorSessionHistoryView()
+                    } label: {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .font(.title3)
+                            Text("실행 기록")
+                                .font(.subheadline.weight(.semibold))
+                            Text("Phase A 세션 이력")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                colors: [.green.opacity(0.15), .teal.opacity(0.15)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                        }
+                        .foregroundStyle(.primary)
+                    }
                 }
                 .padding(.horizontal)
 

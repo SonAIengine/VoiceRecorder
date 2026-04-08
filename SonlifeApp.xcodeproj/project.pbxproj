@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00C59C805972FF162FD898E4 /* OrchestratorSessionHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 900F43CFDA48942DB97C02DC /* OrchestratorSessionHistoryView.swift */; };
 		0AE7498ED86D53DC777F3A2A /* FeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0FE8065B0084985ABF09B7 /* FeedbackService.swift */; };
 		0CE8C2D5216E6BD7BE4A3E93 /* CommandInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B22B375F12F0CFB861FF2D9 /* CommandInputView.swift */; };
 		0E904D1C7D4200C3946080DC /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3280D56D2C4346301D69422E /* AudioRecorder.swift */; };
@@ -88,6 +89,7 @@
 		791141A6AD10AC5CD4F07F31 /* LocationTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTracker.swift; sourceTree = "<group>"; };
 		893BAC8D8B088C5A52B25EFA /* ChunkUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChunkUploader.swift; sourceTree = "<group>"; };
 		8B22B375F12F0CFB861FF2D9 /* CommandInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandInputView.swift; sourceTree = "<group>"; };
+		900F43CFDA48942DB97C02DC /* OrchestratorSessionHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrchestratorSessionHistoryView.swift; sourceTree = "<group>"; };
 		9F6A3D1C5F04C8FA6D76CB16 /* AudioLevelMeterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioLevelMeterView.swift; sourceTree = "<group>"; };
 		B436AC722A5923548F864CCF /* SonlifeApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SonlifeApp.entitlements; sourceTree = "<group>"; };
 		B446D7DC218291750F26EDC6 /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
@@ -184,6 +186,7 @@
 				8B22B375F12F0CFB861FF2D9 /* CommandInputView.swift */,
 				50E5B886F37C125525E5494F /* FeedbackView.swift */,
 				3B1138EEC7185EE2E58E82A4 /* LifeLogControlView.swift */,
+				900F43CFDA48942DB97C02DC /* OrchestratorSessionHistoryView.swift */,
 				3B901045F6314E749FB9EC43 /* RecordingDetailView.swift */,
 				E6793E222635D42106BC5962 /* SessionDetailView.swift */,
 				302D7BAD02239BFE95DA41A5 /* SessionListView.swift */,
@@ -310,6 +313,7 @@
 				4124635DDAE717AA2B8F22BE /* LocationTracker.swift in Sources */,
 				4F60DEA6669BDD4E804A6560 /* OrchestratorAPI.swift in Sources */,
 				759216A92DA3F69CD7AEB290 /* OrchestratorModels.swift in Sources */,
+				00C59C805972FF162FD898E4 /* OrchestratorSessionHistoryView.swift in Sources */,
 				55948FA02AC8377ED5DC1411 /* Recording.swift in Sources */,
 				3D676AA441A98CFFBD9B8898 /* RecordingAttributes.swift in Sources */,
 				B3A43A5532CE0AC5F7B6D78F /* RecordingDetailView.swift in Sources */,
