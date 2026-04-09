@@ -1,10 +1,36 @@
 # SonLife Agent System — Vision & Architecture (iOS Client 관점)
 
 > Personal Life OS를 위한 멀티에이전트 시스템 설계 문서
-> 작성: 2026-04-08 | 상태: Draft v1
+> 작성: 2026-04-08 | 마지막 갱신: 2026-04-09 | 상태: Draft v1 (비전) + Phase A 구현 완료
 >
 > **이 문서는 `SonAIengine/sonlife` (백엔드) 레포의 동일 문서와 짝을 이룬다.**
 > 백엔드 구현 상세는 [sonlife/docs/AGENT-SYSTEM-VISION.md](https://github.com/SonAIengine/sonlife/blob/main/docs/AGENT-SYSTEM-VISION.md) 참조.
+
+---
+
+## 📌 iOS 구현 상태 요약 (2026-04-09)
+
+현재 구체적 iOS 구현 상태 (파일 구조, 모델, API 클라이언트, 화면 동작)는
+별도 문서 참조:
+
+**➡️ [PHASE-A-STATUS.md](./PHASE-A-STATUS.md)** — iOS 현재 구현 스냅샷
+
+**완료된 것**:
+- ✅ CommandInputView (자연어 명령 발행)
+- ✅ ApprovalSheetView (HITL 승인 — **현재는 이메일 전용**)
+- ✅ OrchestratorSessionHistoryView (실행 기록 + 상세)
+- ✅ OrchestratorAPI 서비스 (`/api/command`, `/api/approval`, `/api/sessions` 등)
+- ✅ APNs `approval_request` 타입 핸들러
+- ✅ H3-A FeedbackView와 공존 (별도 namespace)
+
+**진행 중**:
+- 🟡 ApprovalSheetView에 **코드 diff 렌더링 분기** 추가 — CodingAgent 승인 지원 필요
+- 🟡 Budget 위젯 (백엔드는 `/api/budget` 준비됨)
+
+**미시작**:
+- ⚪ Rich notification (mutable-content + Notification Service Extension)
+- ⚪ Session detail에서 tool_calls 타임라인
+- ⚪ macOS multiplatform, Voice command
 
 ---
 

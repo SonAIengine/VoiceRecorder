@@ -2,7 +2,17 @@
 
 > Personal Life OS — 내 모든 삶을 한곳에 모으고 AI 에이전트가 돕는 시스템의 iOS 클라이언트
 
-SonLife 생태계의 사용자 인터페이스 레이어. 현재는 **음성 녹음 + STT**가 주 기능이지만, 에이전트 컨트롤 타워로 확장될 예정.
+SonLife 생태계의 사용자 인터페이스 레이어. **음성 녹음 + STT** + **에이전트 컨트롤 타워** 겸용.
+
+## 📌 Phase A 컨트롤 타워 가동 (2026-04-09)
+
+자연어 명령 → 백엔드 orchestrator → HITL 승인 → 에이전트 실행 전 경로 동작.
+
+- **설계 북극성**: [docs/AGENT-SYSTEM-VISION.md](./docs/AGENT-SYSTEM-VISION.md)
+- **iOS 현재 상태**: [docs/PHASE-A-STATUS.md](./docs/PHASE-A-STATUS.md)
+- **신규 화면**: CommandInputView, ApprovalSheetView, OrchestratorSessionHistoryView
+- **신규 서비스**: OrchestratorAPI (`/api/command`, `/api/approval`, `/api/sessions`)
+- **APNs**: `approval_request` 타입 핸들러 추가 (기존 `feedback_request`와 공존)
 
 ## SonLife 전체 아키텍처에서의 위치
 
