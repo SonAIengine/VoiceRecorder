@@ -229,8 +229,12 @@ struct AgentBudgetUsage: Codable, Identifiable {
     let agentName: String
     let inputTokens: Int
     let outputTokens: Int
+    let totalTokens: Int
+    let reasoningTokens: Int
     let costUsd: Double
     let runs: Int
+    let toolCalls: Int
+    let delegatedTasks: Int
 
     var id: String { "\(date)-\(agentName)" }
 
@@ -239,7 +243,25 @@ struct AgentBudgetUsage: Codable, Identifiable {
         case agentName = "agent_name"
         case inputTokens = "input_tokens"
         case outputTokens = "output_tokens"
+        case totalTokens = "total_tokens"
+        case reasoningTokens = "reasoning_tokens"
         case costUsd = "cost_usd"
         case runs
+        case toolCalls = "tool_calls"
+        case delegatedTasks = "delegated_tasks"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        date = try c.decode(String.self, forKey: .date)
+        agentName = try c.decode(String.self, forKey: .agentName)
+        inputTokens = try c.decodeIfPresent(Int.self, forKey: .inputTokens) ?? 0
+        outputTokens = try c.decodeIfPresent(Int.self, forKey: .outputTokens) ?? 0
+        totalTokens = try c.decodeIfPresent(Int.self, forKey: .totalTokens) ?? 0
+        reasoningTokens = try c.decodeIfPresent(Int.self, forKey: .reasoningTokens) ?? 0
+        costUsd = try c.decodeIfPresent(Double.self, forKey: .costUsd) ?? 0.0
+        runs = try c.decodeIfPresent(Int.self, forKey: .runs) ?? 0
+        toolCalls = try c.decodeIfPresent(Int.self, forKey: .toolCalls) ?? 0
+        delegatedTasks = try c.decodeIfPresent(Int.self, forKey: .delegatedTasks) ?? 0
     }
 }
