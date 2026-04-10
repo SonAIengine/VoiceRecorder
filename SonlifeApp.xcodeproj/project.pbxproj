@@ -19,6 +19,7 @@
 		3D676AA441A98CFFBD9B8898 /* RecordingAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D650DFEE7C02176D018F0B14 /* RecordingAttributes.swift */; };
 		3EC20A35FC6586E4EA67EE58 /* Chunk.swift in Sources */ = {isa = PBXBuildFile; fileRef = F24DC61161718D9A40130B4B /* Chunk.swift */; };
 		4124635DDAE717AA2B8F22BE /* LocationTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 791141A6AD10AC5CD4F07F31 /* LocationTracker.swift */; };
+		4EB468F46A971448E2B096B3 /* SSEClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE53E9A83394C73B0BE3BD29 /* SSEClient.swift */; };
 		4F60DEA6669BDD4E804A6560 /* OrchestratorAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0F936383052F1EE4A16347 /* OrchestratorAPI.swift */; };
 		51D24605D58C173347DD72DA /* HarnessService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C786B892A2C7ACD414C15B4 /* HarnessService.swift */; };
 		529294B032FF8AA3B50F69C6 /* SonLifeLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E901EDE672F6DC7C032E42EC /* SonLifeLiveActivity.swift */; };
@@ -107,6 +108,7 @@
 		F0B11020DE21E3672FA8364B /* OrchestratorModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrchestratorModels.swift; sourceTree = "<group>"; };
 		F24DC61161718D9A40130B4B /* Chunk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chunk.swift; sourceTree = "<group>"; };
 		FD4D02F58E925BDA8FA878D5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FE53E9A83394C73B0BE3BD29 /* SSEClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSEClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -156,6 +158,7 @@
 				CA0F936383052F1EE4A16347 /* OrchestratorAPI.swift */,
 				455AB03D2B94AA822BDA923C /* RecordingEngine.swift */,
 				B446D7DC218291750F26EDC6 /* SessionManager.swift */,
+				FE53E9A83394C73B0BE3BD29 /* SSEClient.swift */,
 				34A7C1D1FEBF929706E704C3 /* VADMonitor.swift */,
 			);
 			path = Engine;
@@ -326,6 +329,7 @@
 				3D676AA441A98CFFBD9B8898 /* RecordingAttributes.swift in Sources */,
 				B3A43A5532CE0AC5F7B6D78F /* RecordingDetailView.swift in Sources */,
 				5E93ED3217066F669C995292 /* RecordingEngine.swift in Sources */,
+				4EB468F46A971448E2B096B3 /* SSEClient.swift in Sources */,
 				1019F4F6F0AACD260A883E63 /* Session.swift in Sources */,
 				8DC6776F201DD4C5CE3F1753 /* SessionDetailView.swift in Sources */,
 				6233DC78CA5DAC295338DC8E /* SessionListView.swift in Sources */,

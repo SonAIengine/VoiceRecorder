@@ -27,6 +27,26 @@ enum OrchestratorAPI {
         return try await post("api/command", body: body)
     }
 
+    /// C-6: 비동기 dispatch — session_id 즉시 반환, 실제 결과는 SSE stream으로.
+    static func dispatchAsync(input: String) async throws -> CommandResponse {
+        let body = CommandRequest(
+            input: input,
+            inputType: "text",
+            source: "ios_app",
+            urgency: "normal"
+        )
+        return try await post("api/command?stream=true", body: body)
+    }
+
+    /// C-6: 세션 SSE 이벤트 스트림 구독.
+    static func sessionEventStream(sessionId: String) -> AsyncThrowingStream<SSEClient.Event, Error> {
+        let base = serverURL.hasSuffix("/") ? serverURL : serverURL + "/"
+        guard let url = URL(string: base + "api/sessions/\(sessionId)/stream") else {
+            return AsyncThrowingStream { $0.finish(throwing: URLError(.badURL)) }
+        }
+        return SSEClient.stream(url: url)
+    }
+
     // MARK: - Approval
 
     static func fetchApproval(token: String) async throws -> ApprovalDetail {
