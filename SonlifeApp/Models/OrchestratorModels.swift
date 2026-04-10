@@ -72,6 +72,7 @@ struct ApprovalPreview: Codable {
     let agent: String?
     let summary: String?
     let args: ApprovalArgs?
+    let permission: String?  // L03 권한 등급 (read_only/draft_only/requires_approval/auto_execute)
 }
 
 struct ApprovalArgs: Codable {
@@ -138,6 +139,8 @@ struct OrchestratorSession: Codable, Identifiable {
     let startedAt: String
     let endedAt: String?
     let usage: SessionUsage?
+    let hasSubAgent: Bool    // L07 격리 실행 존재 여부
+    let parentSessionId: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -151,6 +154,25 @@ struct OrchestratorSession: Codable, Identifiable {
         case startedAt = "started_at"
         case endedAt = "ended_at"
         case usage
+        case hasSubAgent = "has_sub_agent"
+        case parentSessionId = "parent_session_id"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        agentName = try c.decode(String.self, forKey: .agentName)
+        triggeredBy = try c.decode(String.self, forKey: .triggeredBy)
+        prompt = try c.decodeIfPresent(String.self, forKey: .prompt)
+        status = try c.decode(PhaseASessionStatus.self, forKey: .status)
+        result = try c.decodeIfPresent(String.self, forKey: .result)
+        error = try c.decodeIfPresent(String.self, forKey: .error)
+        pendingToken = try c.decodeIfPresent(String.self, forKey: .pendingToken)
+        startedAt = try c.decode(String.self, forKey: .startedAt)
+        endedAt = try c.decodeIfPresent(String.self, forKey: .endedAt)
+        usage = try c.decodeIfPresent(SessionUsage.self, forKey: .usage)
+        hasSubAgent = try c.decodeIfPresent(Bool.self, forKey: .hasSubAgent) ?? false
+        parentSessionId = try c.decodeIfPresent(String.self, forKey: .parentSessionId)
     }
 
     var statusDisplay: String {
@@ -171,6 +193,39 @@ struct OrchestratorSession: Codable, Identifiable {
         case .failed: return "xmark.circle.fill"
         case .rejected: return "minus.circle.fill"
         }
+    }
+}
+
+// MARK: - Session Detail (tool calls)
+
+struct SessionToolCall: Codable, Identifiable {
+    let id: Int
+    let sessionId: String
+    let stepIndex: Int?
+    let toolName: String
+    let status: String
+    let createdAt: String
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case sessionId = "session_id"
+        case stepIndex = "step_index"
+        case toolName = "tool_name"
+        case status
+        case createdAt = "created_at"
+    }
+
+    var isSubAgent: Bool { status == "sub_agent" }
+    var isAutoCompact: Bool { toolName == "_auto_compact" }
+}
+
+struct SessionDetailResponse: Codable {
+    let session: OrchestratorSession
+    let toolCalls: [SessionToolCall]
+
+    enum CodingKeys: String, CodingKey {
+        case session
+        case toolCalls = "tool_calls"
     }
 }
 

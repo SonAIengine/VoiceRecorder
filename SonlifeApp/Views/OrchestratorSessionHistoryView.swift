@@ -156,12 +156,15 @@ private struct OrchestratorSessionRow: View {
 struct OrchestratorSessionDetailSheet: View {
     let session: OrchestratorSession
     @Environment(\.dismiss) private var dismiss
+    @State private var toolCalls: [SessionToolCall] = []
+    @State private var isLoading = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     headerCard
+                    markerRow
                     if let prompt = session.prompt {
                         infoCard(title: "명령", icon: "text.bubble", text: prompt)
                     }
@@ -170,6 +173,9 @@ struct OrchestratorSessionDetailSheet: View {
                     }
                     if let err = session.error, !err.isEmpty {
                         infoCard(title: "에러", icon: "exclamationmark.triangle", text: err, foreground: .red)
+                    }
+                    if !toolCalls.isEmpty {
+                        toolTimelineCard
                     }
                     if let usage = session.usage,
                        let totalTokens = usage.totalTokens, totalTokens > 0 {
@@ -186,7 +192,103 @@ struct OrchestratorSessionDetailSheet: View {
                     Button("닫기") { dismiss() }
                 }
             }
+            .task { await loadToolCalls() }
         }
+    }
+
+    @MainActor
+    private func loadToolCalls() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            let detail = try await OrchestratorAPI.fetchSessionDetail(id: session.id)
+            toolCalls = detail.toolCalls
+        } catch {
+            // silent — 기본 뷰는 여전히 유효
+        }
+    }
+
+    // MARK: - Marker row (compacted / sub-agent)
+
+    @ViewBuilder
+    private var markerRow: some View {
+        let hasCompact = toolCalls.contains { $0.isAutoCompact }
+        let subAgentCount = toolCalls.filter { $0.isSubAgent }.count
+        if hasCompact || subAgentCount > 0 || session.hasSubAgent {
+            HStack(spacing: 8) {
+                if hasCompact {
+                    markerBadge("압축됨", "rectangle.compress.vertical", .yellow)
+                }
+                if subAgentCount > 0 {
+                    markerBadge("sub-agent ×\(subAgentCount)", "shield.lefthalf.filled", .purple)
+                }
+                Spacer()
+            }
+        }
+    }
+
+    private func markerBadge(_ text: String, _ icon: String, _ color: Color) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.caption2)
+            Text(text)
+                .font(.caption.weight(.medium))
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(color.opacity(0.15))
+        .foregroundStyle(color)
+        .clipShape(Capsule())
+    }
+
+    // MARK: - Tool timeline card
+
+    private var toolTimelineCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("실행 단계 (\(toolCalls.count))", systemImage: "list.bullet")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+            ForEach(toolCalls) { call in
+                HStack(spacing: 8) {
+                    Image(systemName: toolIcon(call))
+                        .font(.caption2)
+                        .foregroundStyle(toolColor(call))
+                        .frame(width: 14)
+                    Text("#\(call.stepIndex ?? 0) \(call.toolName)")
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.primary)
+                    if call.isSubAgent {
+                        Text("sub")
+                            .font(.caption2.weight(.semibold))
+                            .padding(.horizontal, 4)
+                            .background(Color.purple.opacity(0.2))
+                            .foregroundStyle(.purple)
+                            .clipShape(Capsule())
+                    }
+                    Spacer()
+                    Text(call.status)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func toolIcon(_ call: SessionToolCall) -> String {
+        if call.isAutoCompact { return "rectangle.compress.vertical" }
+        if call.isSubAgent { return "shield.lefthalf.filled" }
+        if call.status == "ok" { return "checkmark.circle" }
+        return "circle"
+    }
+
+    private func toolColor(_ call: SessionToolCall) -> Color {
+        if call.isAutoCompact { return .yellow }
+        if call.isSubAgent { return .purple }
+        if call.status == "ok" { return .green }
+        return .secondary
     }
 
     private var headerCard: some View {

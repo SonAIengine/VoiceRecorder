@@ -230,11 +230,7 @@ private struct PendingApprovalRow: View {
                     Text(approval.toolName)
                         .font(.caption.monospaced())
                         .foregroundStyle(.secondary)
-                    Text("·")
-                        .foregroundStyle(.tertiary)
-                    Text("컨펌 필요")
-                        .font(.caption)
-                        .foregroundStyle(.orange)
+                    PermissionBadge(permission: approval.preview.permission)
                 }
             }
 
@@ -258,6 +254,46 @@ private struct PendingApprovalRow: View {
     }
 }
 
+// MARK: - Permission badge (L03)
+
+struct PermissionBadge: View {
+    let permission: String?
+
+    var body: some View {
+        if let p = permission, !p.isEmpty {
+            Text(label)
+                .font(.caption2.weight(.semibold))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(color.opacity(0.2))
+                .foregroundStyle(color)
+                .clipShape(Capsule())
+        } else {
+            EmptyView()
+        }
+    }
+
+    private var label: String {
+        switch permission {
+        case "read_only": return "읽기"
+        case "draft_only": return "초안"
+        case "auto_execute": return "자동"
+        case "requires_approval": return "승인"
+        default: return permission ?? ""
+        }
+    }
+
+    private var color: Color {
+        switch permission {
+        case "read_only": return .blue
+        case "draft_only": return .indigo
+        case "auto_execute": return .teal
+        case "requires_approval": return .red
+        default: return .secondary
+        }
+    }
+}
+
 // MARK: - Session row (진행 중 / 완료 공통)
 
 private struct InboxSessionRow: View {
@@ -271,10 +307,27 @@ private struct InboxSessionRow: View {
                 .frame(width: 28)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(titleText)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.primary)
-                    .lineLimit(2)
+                HStack(spacing: 4) {
+                    Text(titleText)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.primary)
+                        .lineLimit(2)
+                    if session.hasSubAgent {
+                        Image(systemName: "shield.lefthalf.filled")
+                            .font(.caption2)
+                            .foregroundStyle(.purple)
+                            .accessibilityLabel("격리 실행")
+                    }
+                    if session.parentSessionId != nil {
+                        Text("sub")
+                            .font(.caption2.weight(.semibold))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 1)
+                            .background(Color.purple.opacity(0.15))
+                            .foregroundStyle(.purple)
+                            .clipShape(Capsule())
+                    }
+                }
                 HStack(spacing: 6) {
                     Text(session.agentName)
                         .font(.caption)
@@ -352,6 +405,11 @@ private struct InboxMenuSheet: View {
                 }
 
                 Section("에이전트") {
+                    NavigationLink {
+                        BudgetView()
+                    } label: {
+                        Label("예산 · 사용량", systemImage: "dollarsign.circle")
+                    }
                     NavigationLink {
                         AgentDashboardView()
                     } label: {

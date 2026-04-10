@@ -86,6 +86,11 @@ enum OrchestratorAPI {
         return try jsonDecoder().decode(Response.self, from: data).sessions
     }
 
+    static func fetchSessionDetail(id: String) async throws -> SessionDetailResponse {
+        let data = try await get("api/sessions/\(id)")
+        return try jsonDecoder().decode(SessionDetailResponse.self, from: data)
+    }
+
     // MARK: - Budget
 
     static func fetchBudget() async throws -> BudgetSummary {
