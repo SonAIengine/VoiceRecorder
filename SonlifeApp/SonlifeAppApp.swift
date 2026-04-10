@@ -17,10 +17,58 @@ struct SonlifeAppApp: App {
 // MARK: - AppDelegate
 
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    // MARK: - Notification Categories & Actions (Identifier constants)
+
+    private enum NotificationCategory {
+        static let approvalRequest = "APPROVAL_REQUEST"
+        static let feedbackRequest = "FEEDBACK_REQUEST"
+    }
+
+    private enum NotificationAction {
+        static let approve = "APPROVE_ACTION"
+        static let reject = "REJECT_ACTION"
+        static let open = "OPEN_ACTION"
+    }
+
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        UNUserNotificationCenter.current().delegate = self
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
+
+        // APPROVAL_REQUEST 카테고리 — Phase A HITL 승인 (승인/거절 인라인 액션)
+        let approveAction = UNNotificationAction(
+            identifier: NotificationAction.approve,
+            title: "승인",
+            options: [.authenticationRequired, .foreground]
+        )
+        let rejectAction = UNNotificationAction(
+            identifier: NotificationAction.reject,
+            title: "거절",
+            options: [.destructive, .foreground]
+        )
+        let openAction = UNNotificationAction(
+            identifier: NotificationAction.open,
+            title: "열기",
+            options: [.foreground]
+        )
+        let approvalCategory = UNNotificationCategory(
+            identifier: NotificationCategory.approvalRequest,
+            actions: [approveAction, openAction, rejectAction],
+            intentIdentifiers: [],
+            options: [.customDismissAction]
+        )
+
+        // FEEDBACK_REQUEST 카테고리 — 기존 H3-A
+        let feedbackCategory = UNNotificationCategory(
+            identifier: NotificationCategory.feedbackRequest,
+            actions: [openAction],
+            intentIdentifiers: [],
+            options: []
+        )
+
+        center.setNotificationCategories([approvalCategory, feedbackCategory])
+
+        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error = error {
                 print("[APNs] 권한 요청 에러: \(error.localizedDescription)")
             }
@@ -54,34 +102,52 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         completionHandler([.banner, .sound, .badge])
     }
 
-    // 푸시 탭 핸들러
+    // 푸시 탭/액션 핸들러
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
-        if let type = userInfo["type"] as? String {
-            switch type {
-            case "feedback_request":
-                if let sessionId = userInfo["session_id"] as? String {
-                    let summary = userInfo["summary_preview"] as? String ?? ""
-                    NotificationCenter.default.post(
-                        name: .showFeedback,
-                        object: nil,
-                        userInfo: ["session_id": sessionId, "summary": summary]
-                    )
-                }
-            case "approval_request":
-                // Phase A — 에이전트 HITL 승인
-                if let token = userInfo["token"] as? String {
-                    NotificationCenter.default.post(
-                        name: .showApproval,
-                        object: nil,
-                        userInfo: ["token": token]
-                    )
-                }
-            default:
-                break
+        let actionId = response.actionIdentifier
+        let type = (userInfo["type"] as? String) ?? ""
+
+        switch type {
+        case "feedback_request":
+            if let sessionId = userInfo["session_id"] as? String {
+                let summary = userInfo["summary_preview"] as? String ?? ""
+                NotificationCenter.default.post(
+                    name: .showFeedback,
+                    object: nil,
+                    userInfo: ["session_id": sessionId, "summary": summary]
+                )
             }
+
+        case "approval_request":
+            guard let token = userInfo["token"] as? String else {
+                completionHandler()
+                return
+            }
+
+            // 인라인 액션 처리
+            if actionId == NotificationAction.approve {
+                // Face ID 인증 후 즉시 승인 (authenticationRequired 옵션이 처리)
+                Task {
+                    _ = try? await OrchestratorAPI.approve(token: token, modifiedArgs: nil)
+                }
+            } else if actionId == NotificationAction.reject {
+                Task {
+                    _ = try? await OrchestratorAPI.reject(token: token, reason: "알림에서 거절")
+                }
+            } else {
+                // "열기" 또는 기본 탭 → ApprovalSheetView 오픈
+                NotificationCenter.default.post(
+                    name: .showApproval,
+                    object: nil,
+                    userInfo: ["token": token]
+                )
+            }
+
+        default:
+            break
         }
         completionHandler()
     }
