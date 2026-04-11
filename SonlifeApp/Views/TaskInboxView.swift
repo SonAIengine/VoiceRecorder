@@ -740,6 +740,11 @@ private struct InboxMenuSheet: View {
                         Label("예산 · 사용량", systemImage: "dollarsign.circle")
                     }
                     NavigationLink {
+                        MemoryStatsView()
+                    } label: {
+                        Label("메모리 · 그래프", systemImage: "brain.head.profile")
+                    }
+                    NavigationLink {
                         AgentDashboardView()
                     } label: {
                         Label("대시보드", systemImage: "chart.bar.xaxis")

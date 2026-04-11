@@ -207,6 +207,47 @@ struct OrchestratorSession: Codable, Identifiable {
     }
 }
 
+// MARK: - Phase D Memory Observability
+
+struct MemoryGraphStats: Codable {
+    let totalNodes: Int
+    let kindCounts: [String: Int]
+    let levelCounts: [String: Int]
+    let cacheHitRate: Double
+    let cacheSize: Int
+    let error: String?
+
+    enum CodingKeys: String, CodingKey {
+        case totalNodes = "total_nodes"
+        case kindCounts = "kind_counts"
+        case levelCounts = "level_counts"
+        case cacheHitRate = "cache_hit_rate"
+        case cacheSize = "cache_size"
+        case error
+    }
+}
+
+struct IngestorStats: Codable {
+    let healthy: Bool
+    let lastError: String?
+    let ingestedCount: Int
+    let skippedDuplicates: Int
+    let stateCount: Int
+
+    enum CodingKeys: String, CodingKey {
+        case healthy
+        case lastError = "last_error"
+        case ingestedCount = "ingested_count"
+        case skippedDuplicates = "skipped_duplicates"
+        case stateCount = "state_count"
+    }
+}
+
+struct MemoryStatsResponse: Codable {
+    let graph: MemoryGraphStats
+    let ingestor: IngestorStats
+}
+
 // MARK: - Session Detail (tool calls)
 
 struct SessionToolCall: Codable, Identifiable {

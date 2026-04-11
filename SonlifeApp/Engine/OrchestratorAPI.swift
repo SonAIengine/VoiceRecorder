@@ -98,6 +98,13 @@ enum OrchestratorAPI {
         return try jsonDecoder().decode(BudgetSummary.self, from: data)
     }
 
+    // MARK: - Phase D Memory Observability
+
+    static func fetchMemoryStats() async throws -> MemoryStatsResponse {
+        let data = try await get("api/memory/stats")
+        return try jsonDecoder().decode(MemoryStatsResponse.self, from: data)
+    }
+
     // MARK: - Pending approvals (대기 중)
 
     static func fetchPendingApprovals() async throws -> [ApprovalDetail] {
