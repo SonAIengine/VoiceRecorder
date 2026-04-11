@@ -623,14 +623,27 @@ private struct InboxSessionRow: View {
                         .accessibilityLabel("자율 실행: \(autonomousLabel)")
                     }
                 }
-                HStack(spacing: 6) {
-                    Text(session.agentName)
-                        .font(.caption)
+                if let quoted = subtitleOriginal {
+                    Text(quoted)
+                        .font(.footnote)
                         .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .italic()
+                }
+                HStack(spacing: 6) {
+                    if session.isAutonomous {
+                        // 자율 세션은 agent_name 대신 "자율" 톤 유지
+                        Text("자율 에이전트")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text(session.agentName)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                     Text("·")
                         .foregroundStyle(.tertiary)
                     if let live = liveState, !live.phase.isEmpty, session.status == .running {
-                        // 라이브 상태 우선 표시
                         Text(live.phase)
                             .font(.caption)
                             .foregroundStyle(.blue)
@@ -667,6 +680,12 @@ private struct InboxSessionRow: View {
     }
 
     private var titleText: String {
+        // Phase D: 자율 세션이면 trigger_context 기반 사람 친화 제목
+        if session.isAutonomous, let trigger = session.triggerContext {
+            let sender = trigger.displaySender
+            let channel = trigger.displaySourceLabel
+            return "\(sender) · \(channel) 답장"
+        }
         if let prompt = session.prompt, !prompt.isEmpty {
             return prompt
         }
@@ -674,6 +693,22 @@ private struct InboxSessionRow: View {
             return result
         }
         return session.agentName
+    }
+
+    /// 자율 세션일 때 원본 메시지를 한 줄 요약으로 표시.
+    private var subtitleOriginal: String? {
+        guard session.isAutonomous,
+              let trigger = session.triggerContext,
+              let content = trigger.originalContent,
+              !content.isEmpty
+        else { return nil }
+        let cleaned = content
+            .replacingOccurrences(of: "\n", with: " ")
+            .trimmingCharacters(in: .whitespaces)
+        if cleaned.count > 60 {
+            return "\"\(cleaned.prefix(60))…\""
+        }
+        return "\"\(cleaned)\""
     }
 
     private var statusColor: Color {

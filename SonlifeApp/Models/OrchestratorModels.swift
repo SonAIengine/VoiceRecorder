@@ -79,6 +79,63 @@ struct ApprovalArgs: Codable {
     let to: String?
     let subject: String?
     let body: String?
+    let chatId: String?  // Teams send_teams_message 전용
+
+    enum CodingKeys: String, CodingKey {
+        case to
+        case subject
+        case body
+        case chatId = "chat_id"
+    }
+
+    init(
+        to: String? = nil,
+        subject: String? = nil,
+        body: String? = nil,
+        chatId: String? = nil
+    ) {
+        self.to = to
+        self.subject = subject
+        self.body = body
+        self.chatId = chatId
+    }
+}
+
+/// Phase D: 자율 세션의 원본 이벤트 (lifelog entry 조회 결과).
+///
+/// 서버가 /api/approvals/{token} 또는 /api/sessions 응답에 자율 세션이면
+/// 끼워 준다. iOS 는 이걸로 "누가 뭘 보냈는지" 카드를 렌더링.
+struct TriggerContext: Codable {
+    let source: String?
+    let sender: String?
+    let channel: String?
+    let timestamp: String?
+    let originalTitle: String?
+    let originalContent: String?
+    let importance: String?
+
+    enum CodingKeys: String, CodingKey {
+        case source
+        case sender
+        case channel
+        case timestamp
+        case originalTitle = "original_title"
+        case originalContent = "original_content"
+        case importance
+    }
+
+    var displaySender: String { sender ?? "알 수 없는 발신자" }
+    var displaySourceLabel: String {
+        switch source {
+        case "email": return "Email"
+        case "teams": return "Teams"
+        case "kakaotalk": return "카카오톡"
+        case "voice": return "녹음"
+        case "github": return "GitHub"
+        case "gitlab": return "GitLab"
+        default: return source?.capitalized ?? "알림"
+        }
+    }
 }
 
 struct ApprovalDetail: Codable, Identifiable {
@@ -90,6 +147,7 @@ struct ApprovalDetail: Codable, Identifiable {
     let decision: String
     let createdAt: String
     let resolvedAt: String?
+    let triggerContext: TriggerContext?  // Phase D
 
     var id: String { token }
 
@@ -102,6 +160,7 @@ struct ApprovalDetail: Codable, Identifiable {
         case decision
         case createdAt = "created_at"
         case resolvedAt = "resolved_at"
+        case triggerContext = "trigger_context"
     }
 }
 
@@ -144,6 +203,7 @@ struct OrchestratorSession: Codable, Identifiable {
     let origin: String       // "user" | "autonomous" — Phase D 자율 루프
     let triggerSource: String?    // 자율 세션이면 "email" / "teams" / "calendar"
     let triggerEventId: String?   // lifelog source_id 추적
+    let triggerContext: TriggerContext?  // Phase D — 원본 메시지 풍부화
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -162,6 +222,7 @@ struct OrchestratorSession: Codable, Identifiable {
         case origin
         case triggerSource = "trigger_source"
         case triggerEventId = "trigger_event_id"
+        case triggerContext = "trigger_context"
     }
 
     init(from decoder: Decoder) throws {
@@ -182,6 +243,7 @@ struct OrchestratorSession: Codable, Identifiable {
         origin = try c.decodeIfPresent(String.self, forKey: .origin) ?? "user"
         triggerSource = try c.decodeIfPresent(String.self, forKey: .triggerSource)
         triggerEventId = try c.decodeIfPresent(String.self, forKey: .triggerEventId)
+        triggerContext = try c.decodeIfPresent(TriggerContext.self, forKey: .triggerContext)
     }
 
     var isAutonomous: Bool { origin == "autonomous" }
