@@ -156,6 +156,34 @@ struct FeedbackLesson: Codable, Identifiable {
     }
 }
 
+// MARK: - Autonomy state (M1a #2)
+
+struct AutonomyState: Codable {
+    let enabled: Bool
+    let envEnabled: Bool
+    let overrideEnabled: Bool?
+    let hardStopped: Bool
+    let canDispatch: Bool
+    let ruleCount: Int
+    let seenCount: Int
+    let dispatchedCount: Int
+    let perSourceCount: [String: Int]?
+    let skippedReasons: [String: Int]?
+
+    enum CodingKeys: String, CodingKey {
+        case enabled
+        case envEnabled = "env_enabled"
+        case overrideEnabled = "override_enabled"
+        case hardStopped = "hard_stopped"
+        case canDispatch = "can_dispatch"
+        case ruleCount = "rule_count"
+        case seenCount = "seen_count"
+        case dispatchedCount = "dispatched_count"
+        case perSourceCount = "per_source_count"
+        case skippedReasons = "skipped_reasons"
+    }
+}
+
 // MARK: - Service
 
 enum HarnessService {
@@ -166,6 +194,20 @@ enum HarnessService {
     static func fetchStats() async throws -> HarnessStats {
         let data = try await get("api/harness/stats")
         return try JSONDecoder().decode(HarnessStats.self, from: data)
+    }
+
+    // MARK: - Autonomy
+
+    static func fetchAutonomyState() async throws -> AutonomyState {
+        let data = try await get("api/autonomy/state")
+        return try JSONDecoder().decode(AutonomyState.self, from: data)
+    }
+
+    /// value: true=강제 on, false=강제 off, nil=override 해제(env 기본값으로).
+    static func setAutonomyEnabled(_ value: Bool?) async throws -> AutonomyState {
+        let body: [String: Any?] = ["enabled": value]
+        let data = try await post("api/autonomy/toggle", body: body)
+        return try JSONDecoder().decode(AutonomyState.self, from: data)
     }
 
     static func fetchSessions(limit: Int = 30, agentId: String? = nil) async throws -> [AgentSession] {
@@ -197,6 +239,27 @@ enum HarnessService {
         }
         var request = URLRequest(url: url)
         request.timeoutInterval = 10
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+        return data
+    }
+
+    private static func post(_ path: String, body: [String: Any?]) async throws -> Data {
+        guard let url = URL(string: serverURL)?.appendingPathComponent(path) else {
+            throw URLError(.badURL)
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 10
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        // null 값을 JSONSerialization 이 해석할 수 있도록 NSNull 로 치환
+        var serializable: [String: Any] = [:]
+        for (k, v) in body {
+            serializable[k] = v ?? NSNull()
+        }
+        request.httpBody = try JSONSerialization.data(withJSONObject: serializable)
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
             throw URLError(.badServerResponse)

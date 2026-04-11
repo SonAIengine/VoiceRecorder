@@ -23,10 +23,15 @@ struct SettingsView: View {
     @AppStorage("ollama_model") private var ollamaModel: String = ""
     @State private var availableModels: [OllamaModel] = []
     @State private var isLoadingModels = false
+    @State private var autonomyState: AutonomyState?
+    @State private var autonomyError: String?
+    @State private var isUpdatingAutonomy = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         Form {
+            autonomySection
+
             Section("화면 모드") {
                 Picker("테마", selection: $selectedTheme) {
                     ForEach(AppTheme.allCases, id: \.rawValue) { theme in
@@ -141,6 +146,7 @@ struct SettingsView: View {
         }
         .navigationTitle("설정")
         .navigationBarTitleDisplayMode(.inline)
+        .task { await loadAutonomyState() }
         #if DEBUG
         .sheet(isPresented: $showDevFeedback) {
             FeedbackView(
@@ -154,6 +160,130 @@ struct SettingsView: View {
     #if DEBUG
     @State private var showDevFeedback = false
     #endif
+
+    // MARK: - Autonomy section (M1a #2)
+
+    private var autonomySection: some View {
+        Section {
+            if let state = autonomyState {
+                Toggle(isOn: Binding(
+                    get: { state.enabled },
+                    set: { newValue in
+                        Task { await toggleAutonomy(newValue) }
+                    }
+                )) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("자율 루프 활성")
+                            .font(.body)
+                        Text(statusSubtitle(for: state))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .disabled(isUpdatingAutonomy)
+
+                if state.hardStopped {
+                    Label {
+                        Text("예산 150% 초과로 자동 정지됨. 켜면 함께 해제됩니다.")
+                            .font(.caption)
+                    } icon: {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                    }
+                    .foregroundStyle(.orange)
+                }
+
+                HStack {
+                    Text("처리된 이벤트")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text("\(state.dispatchedCount) / 관측 \(state.seenCount)")
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
+
+                if let reasons = state.skippedReasons, !reasons.isEmpty {
+                    let total = reasons.values.reduce(0, +)
+                    HStack {
+                        Text("건너뜀")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text("\(total) (\(reasons.keys.sorted().joined(separator: ", ")))")
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } else if let error = autonomyError {
+                Label(error, systemImage: "exclamationmark.circle")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                Button("다시 시도") {
+                    Task { await loadAutonomyState() }
+                }
+            } else {
+                HStack {
+                    ProgressView()
+                    Text("상태 불러오는 중...")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        } header: {
+            Text("자율 루프")
+        } footer: {
+            Text("수집기에서 새 메시지가 들어오면 에이전트가 자동으로 답변 초안을 작성합니다. 실제 발송은 승인 후에만 이뤄집니다.")
+        }
+    }
+
+    private func statusSubtitle(for state: AutonomyState) -> String {
+        if state.hardStopped {
+            return "예산 초과로 정지 중"
+        }
+        if state.enabled {
+            let ruleText = "룰 \(state.ruleCount)개 활성"
+            return state.canDispatch ? ruleText : "\(ruleText) · dispatch 불가"
+        }
+        if let override = state.overrideEnabled, override == false {
+            return "수동 정지됨"
+        }
+        return "환경변수로 비활성 (AUTONOMY_ENABLED=false)"
+    }
+
+    private func loadAutonomyState() async {
+        do {
+            let state = try await HarnessService.fetchAutonomyState()
+            await MainActor.run {
+                self.autonomyState = state
+                self.autonomyError = nil
+            }
+        } catch {
+            await MainActor.run {
+                self.autonomyError = "자율 루프 상태 조회 실패"
+            }
+        }
+    }
+
+    private func toggleAutonomy(_ enable: Bool) async {
+        await MainActor.run { self.isUpdatingAutonomy = true }
+        defer {
+            Task { @MainActor in self.isUpdatingAutonomy = false }
+        }
+        do {
+            // 명시적으로 true/false 를 override 에 기록.
+            // nil(환경변수 복귀)은 현재 UI 에서 노출하지 않음 — 항상 의도적 on/off.
+            let state = try await HarnessService.setAutonomyEnabled(enable)
+            await MainActor.run {
+                self.autonomyState = state
+                self.autonomyError = nil
+                Haptic.tap(.medium)
+            }
+        } catch {
+            await MainActor.run {
+                self.autonomyError = "토글 실패 — 네트워크 확인"
+            }
+        }
+    }
 
     private func testConnection() {
         testStatus = .testing
