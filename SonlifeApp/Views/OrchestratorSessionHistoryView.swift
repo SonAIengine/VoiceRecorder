@@ -105,14 +105,14 @@ private struct OrchestratorSessionRow: View {
                 }
 
                 if let prompt = session.prompt {
-                    Text(prompt)
+                    Text(stripMarkdown(prompt))
                         .font(.footnote)
                         .foregroundStyle(.primary)
                         .lineLimit(2)
                 }
 
                 if let result = session.result, !result.isEmpty {
-                    Text(result)
+                    Text(stripMarkdown(result))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -320,8 +320,8 @@ struct OrchestratorSessionDetailSheet: View {
             Label(title, systemImage: icon)
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.secondary)
-            Text(text)
-                .font(.subheadline)
+            // 마크다운 렌더링 — LLM 이 생성한 ## / **bold** / --- 를 올바르게 표시
+            MarkdownText(source: text)
                 .foregroundStyle(foreground)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .textSelection(.enabled)

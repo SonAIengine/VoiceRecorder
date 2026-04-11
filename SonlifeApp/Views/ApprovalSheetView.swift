@@ -302,9 +302,12 @@ struct ApprovalSheetView: View {
                         .padding(6)
                         .background(Color(.tertiarySystemBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 8))
-                } else {
-                    Text(editedBody.isEmpty ? "-" : editedBody)
+                } else if editedBody.isEmpty {
+                    Text("-")
                         .font(.body)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    MarkdownText(source: editedBody)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
@@ -319,9 +322,12 @@ struct ApprovalSheetView: View {
                     .padding(6)
                     .background(Color(.tertiarySystemBackground))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
-            } else {
-                Text(editedBody.isEmpty ? "-" : editedBody)
+            } else if editedBody.isEmpty {
+                Text("-")
                     .font(.body)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                MarkdownText(source: editedBody)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }

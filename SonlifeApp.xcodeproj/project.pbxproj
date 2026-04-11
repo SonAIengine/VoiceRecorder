@@ -41,6 +41,7 @@
 		D64D25C37313E858CFDF77FA /* ApprovalSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058E667057DEC875B2988207 /* ApprovalSheetView.swift */; };
 		DA8E3AB2D7F39EEE5B597B44 /* BudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F77DDC5E3788CFD159CE6B3 /* BudgetView.swift */; };
 		E6CAE176FA674E2EB5F4FB4E /* MemoryStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396C8E00D68B4FFAAE28417A /* MemoryStatsView.swift */; };
+		33ECB20D10FC4961AC5346E8 /* MarkdownText.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD518DF7A354B639CD34356 /* MarkdownText.swift */; };
 		DBF84366AC020FC2485C409D /* SonLifeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3700A2ABDB1FEBFB10085027 /* SonLifeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E1B7889E71D6DB45ACB7F513 /* SkillPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141DD0D3CB75BAD886A32C0F /* SkillPickerView.swift */; };
 		EE72B5E5FF868BDB9986EAF2 /* AudioLevelMeterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6A3D1C5F04C8FA6D76CB16 /* AudioLevelMeterView.swift */; };
@@ -95,6 +96,7 @@
 		5C11E6D0FF4B113D6EFC45CA /* SonlifeApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SonlifeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F77DDC5E3788CFD159CE6B3 /* BudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetView.swift; sourceTree = "<group>"; };
 		396C8E00D68B4FFAAE28417A /* MemoryStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryStatsView.swift; sourceTree = "<group>"; };
+		BCD518DF7A354B639CD34356 /* MarkdownText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownText.swift; sourceTree = "<group>"; };
 		791141A6AD10AC5CD4F07F31 /* LocationTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTracker.swift; sourceTree = "<group>"; };
 		893BAC8D8B088C5A52B25EFA /* ChunkUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChunkUploader.swift; sourceTree = "<group>"; };
 		8B22B375F12F0CFB861FF2D9 /* CommandInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandInputView.swift; sourceTree = "<group>"; };
@@ -199,6 +201,7 @@
 				9F6A3D1C5F04C8FA6D76CB16 /* AudioLevelMeterView.swift */,
 				6F77DDC5E3788CFD159CE6B3 /* BudgetView.swift */,
 				396C8E00D68B4FFAAE28417A /* MemoryStatsView.swift */,
+				BCD518DF7A354B639CD34356 /* MarkdownText.swift */,
 				8B22B375F12F0CFB861FF2D9 /* CommandInputView.swift */,
 				50E5B886F37C125525E5494F /* FeedbackView.swift */,
 				3B1138EEC7185EE2E58E82A4 /* LifeLogControlView.swift */,
@@ -324,6 +327,7 @@
 				33ADF2D93BC0D64810FA654B /* AudioSessionHandler.swift in Sources */,
 				DA8E3AB2D7F39EEE5B597B44 /* BudgetView.swift in Sources */,
 				E6CAE176FA674E2EB5F4FB4E /* MemoryStatsView.swift in Sources */,
+				33ECB20D10FC4961AC5346E8 /* MarkdownText.swift in Sources */,
 				3EC20A35FC6586E4EA67EE58 /* Chunk.swift in Sources */,
 				F91EDFFFD97622BAA12A7B13 /* ChunkUploader.swift in Sources */,
 				0CE8C2D5216E6BD7BE4A3E93 /* CommandInputView.swift in Sources */,

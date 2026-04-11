@@ -495,7 +495,7 @@ private struct PendingApprovalRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "hourglass")
+            Image(systemName: iconName)
                 .font(.title3)
                 .foregroundStyle(.orange)
                 .frame(width: 28)
@@ -505,9 +505,16 @@ private struct PendingApprovalRow: View {
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.primary)
                     .lineLimit(2)
+                if let quoted = subtitleQuote {
+                    Text(quoted)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .italic()
+                }
                 HStack(spacing: 6) {
-                    Text(approval.toolName)
-                        .font(.caption.monospaced())
+                    Text(toolFriendlyLabel)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                     PermissionBadge(permission: approval.preview.permission)
                 }
@@ -522,14 +529,53 @@ private struct PendingApprovalRow: View {
         .padding(.vertical, 2)
     }
 
+    /// 카드 제목. trigger_context 있으면 "WHO · 채널 답장" 으로, 아니면
+    /// 친화 요약 fallback. raw "send_teams_message 실행" 노출 방지.
     private var titleText: String {
-        if let summary = approval.preview.summary, !summary.isEmpty {
-            return summary
+        if let trigger = approval.triggerContext, let sender = trigger.sender {
+            return "\(sender) · \(trigger.displaySourceLabel) 답장"
         }
         if let subject = approval.args.subject, !subject.isEmpty {
             return subject
         }
-        return approval.toolName
+        // 서버 hook 이 "이메일 발송", "Teams 메시지 발송 — ..." 같이 개선된 요약 제공
+        if let summary = approval.preview.summary, !summary.isEmpty {
+            return stripMarkdown(summary)
+        }
+        return toolFriendlyLabel
+    }
+
+    /// 원본 메시지 한 줄 인용 (trigger_context 있을 때만).
+    private var subtitleQuote: String? {
+        guard let trigger = approval.triggerContext,
+              let content = trigger.originalContent,
+              !content.isEmpty
+        else { return nil }
+        let cleaned = stripMarkdown(content)
+        if cleaned.count > 60 {
+            return "\"\(cleaned.prefix(60))…\""
+        }
+        return "\"\(cleaned)\""
+    }
+
+    private var iconName: String {
+        switch approval.toolName {
+        case "send_email": return "envelope.badge"
+        case "send_teams_message": return "bubble.left.and.bubble.right.fill"
+        case "commit_and_push", "git_push": return "arrow.up.doc.fill"
+        default: return "hourglass"
+        }
+    }
+
+    /// raw tool_name 대신 사람 친화 라벨.
+    private var toolFriendlyLabel: String {
+        switch approval.toolName {
+        case "send_email", "email_send": return "이메일 발송"
+        case "send_teams_message": return "Teams 메시지 발송"
+        case "commit_and_push", "git_push": return "Git push"
+        case "create_calendar_event": return "일정 생성"
+        default: return approval.toolName.replacingOccurrences(of: "_", with: " ")
+        }
     }
 }
 
@@ -686,11 +732,12 @@ private struct InboxSessionRow: View {
             let channel = trigger.displaySourceLabel
             return "\(sender) · \(channel) 답장"
         }
+        // 비자율 세션 — prompt 가 ### 같은 마크다운을 가질 수 있으므로 strip
         if let prompt = session.prompt, !prompt.isEmpty {
-            return prompt
+            return stripMarkdown(prompt)
         }
         if let result = session.result, !result.isEmpty {
-            return result
+            return stripMarkdown(result)
         }
         return session.agentName
     }
@@ -702,9 +749,7 @@ private struct InboxSessionRow: View {
               let content = trigger.originalContent,
               !content.isEmpty
         else { return nil }
-        let cleaned = content
-            .replacingOccurrences(of: "\n", with: " ")
-            .trimmingCharacters(in: .whitespaces)
+        let cleaned = stripMarkdown(content)
         if cleaned.count > 60 {
             return "\"\(cleaned.prefix(60))…\""
         }
