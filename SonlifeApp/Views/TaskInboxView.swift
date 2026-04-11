@@ -815,6 +815,16 @@ private struct InboxMenuSheet: View {
 
                 Section("에이전트") {
                     NavigationLink {
+                        SystemStatusView()
+                    } label: {
+                        Label("시스템 상태", systemImage: "checkmark.shield")
+                    }
+                    NavigationLink {
+                        QualityMetricsView()
+                    } label: {
+                        Label("품질 지표", systemImage: "chart.line.uptrend.xyaxis")
+                    }
+                    NavigationLink {
                         BudgetView()
                     } label: {
                         Label("예산 · 사용량", systemImage: "dollarsign.circle")

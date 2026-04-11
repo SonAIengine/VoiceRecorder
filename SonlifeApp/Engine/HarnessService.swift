@@ -156,7 +156,7 @@ struct FeedbackLesson: Codable, Identifiable {
     }
 }
 
-// MARK: - Autonomy state (M1a #2)
+// MARK: - Autonomy state (M1a #2/#3/#5)
 
 struct AutonomyState: Codable {
     let enabled: Bool
@@ -169,6 +169,10 @@ struct AutonomyState: Codable {
     let dispatchedCount: Int
     let perSourceCount: [String: Int]?
     let skippedReasons: [String: Int]?
+    // M1a #3/#5 — observability
+    let collectors: [CollectorHealth]?
+    let subscriptions: [SubscriptionStatus]?
+    let budget: BudgetStatus?
 
     enum CodingKeys: String, CodingKey {
         case enabled
@@ -181,6 +185,172 @@ struct AutonomyState: Codable {
         case dispatchedCount = "dispatched_count"
         case perSourceCount = "per_source_count"
         case skippedReasons = "skipped_reasons"
+        case collectors
+        case subscriptions
+        case budget
+    }
+}
+
+struct CollectorHealth: Codable, Identifiable {
+    let id: String
+    let sourceName: String
+    let name: String
+    let nextRunAt: String?
+    let lastSuccessAt: String?
+    let lastFailureAt: String?
+    let lastError: String?
+    let successCount: Int
+    let failureCount: Int
+    let newEntriesTotal: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case sourceName = "source_name"
+        case name
+        case nextRunAt = "next_run_at"
+        case lastSuccessAt = "last_success_at"
+        case lastFailureAt = "last_failure_at"
+        case lastError = "last_error"
+        case successCount = "success_count"
+        case failureCount = "failure_count"
+        case newEntriesTotal = "new_entries_total"
+    }
+
+    /// 상태 등급 — 뷰에서 색 배지로 매핑.
+    var healthGrade: HealthGrade {
+        if lastError != nil {
+            return .failing
+        }
+        if lastSuccessAt == nil {
+            return .unknown  // 아직 한 번도 안 돌았음
+        }
+        return .healthy
+    }
+}
+
+struct SubscriptionStatus: Codable, Identifiable {
+    let id: String
+    let subscriptionIdPrefix: String?
+    let resource: String?
+    let expiration: String?
+    let expiresInSeconds: Int?
+    let expired: Bool
+    let createdAt: String?
+    let status: String  // healthy | warning | failing | expired
+    let consecutiveFailures: Int
+    let lastRenewalAt: String?
+    let lastRenewalError: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case subscriptionIdPrefix = "subscription_id_prefix"
+        case resource
+        case expiration
+        case expiresInSeconds = "expires_in_seconds"
+        case expired
+        case createdAt = "created_at"
+        case status
+        case consecutiveFailures = "consecutive_failures"
+        case lastRenewalAt = "last_renewal_at"
+        case lastRenewalError = "last_renewal_error"
+    }
+
+    var healthGrade: HealthGrade {
+        switch status {
+        case "healthy": return .healthy
+        case "warning": return .warning
+        case "failing", "expired": return .failing
+        default: return .unknown
+        }
+    }
+}
+
+struct BudgetStatus: Codable {
+    let available: Bool
+    let globalUsedUsd: Double?
+    let globalLimitUsd: Double?
+    let globalPct: Double?
+    let hardStopThresholdUsd: Double?
+    let hardStopPct: Double?
+    let hardStopMultiplier: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case available
+        case globalUsedUsd = "global_used_usd"
+        case globalLimitUsd = "global_limit_usd"
+        case globalPct = "global_pct"
+        case hardStopThresholdUsd = "hard_stop_threshold_usd"
+        case hardStopPct = "hard_stop_pct"
+        case hardStopMultiplier = "hard_stop_multiplier"
+    }
+
+    var healthGrade: HealthGrade {
+        guard let pct = hardStopPct else { return .unknown }
+        if pct >= 100 { return .failing }    // hard-stop 걸림
+        if pct >= 66 { return .warning }     // hard-stop 의 2/3 이상
+        if pct >= 33 { return .warning }     // 1/3 이상 — 주의
+        return .healthy
+    }
+}
+
+enum HealthGrade: String {
+    case healthy
+    case warning
+    case failing
+    case unknown
+}
+
+// MARK: - Rejection metrics (M1a #6/#7)
+
+struct RejectionMetrics: Codable {
+    let window: MetricsWindow
+    let totalResolved: Int
+    let approved: Int
+    let rejected: Int
+    let modified: Int
+    let pendingInWindow: Int
+    let rejectionRate: Double?
+    let editRate: Double?
+    let bySource: [String: MetricsBreakdown]
+    let byOrigin: [String: MetricsBreakdown]
+
+    enum CodingKeys: String, CodingKey {
+        case window
+        case totalResolved = "total_resolved"
+        case approved
+        case rejected
+        case modified
+        case pendingInWindow = "pending_in_window"
+        case rejectionRate = "rejection_rate"
+        case editRate = "edit_rate"
+        case bySource = "by_source"
+        case byOrigin = "by_origin"
+    }
+}
+
+struct MetricsWindow: Codable {
+    let days: Int
+    let start: String
+    let end: String
+}
+
+struct MetricsBreakdown: Codable {
+    let total: Int
+    let resolved: Int
+    let approved: Int
+    let rejected: Int
+    let modified: Int
+    let pending: Int
+    let rejectionRate: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case total
+        case resolved
+        case approved
+        case rejected
+        case modified
+        case pending
+        case rejectionRate = "rejection_rate"
     }
 }
 
@@ -208,6 +378,13 @@ enum HarnessService {
         let body: [String: Any?] = ["enabled": value]
         let data = try await post("api/autonomy/toggle", body: body)
         return try JSONDecoder().decode(AutonomyState.self, from: data)
+    }
+
+    // MARK: - Metrics (M1a #6/#7)
+
+    static func fetchRejectionMetrics(days: Int = 7) async throws -> RejectionMetrics {
+        let data = try await get("api/metrics/rejection_rate?days=\(days)")
+        return try JSONDecoder().decode(RejectionMetrics.self, from: data)
     }
 
     static func fetchSessions(limit: Int = 30, agentId: String? = nil) async throws -> [AgentSession] {

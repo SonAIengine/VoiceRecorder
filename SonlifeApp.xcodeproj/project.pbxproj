@@ -14,8 +14,10 @@
 		1019F4F6F0AACD260A883E63 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0707C82C16BCE2061E6A3A7E /* Session.swift */; };
 		17F40FFB0731F5143FD58303 /* AgentSessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B83A37312E737EFB7EBDB3D3 /* AgentSessionDetailView.swift */; };
 		1ED751D2ABCAB6C3696D186D /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B446D7DC218291750F26EDC6 /* SessionManager.swift */; };
+		33133F1BD4659AF040C0F6E9 /* MarkdownText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1C507D92E7DFBD987BF889 /* MarkdownText.swift */; };
 		33ADF2D93BC0D64810FA654B /* AudioSessionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F0CD21F732C80869F81376 /* AudioSessionHandler.swift */; };
 		38CE97793CDF3204748C7773 /* RecordingAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D650DFEE7C02176D018F0B14 /* RecordingAttributes.swift */; };
+		392227DBF6A25BCBBF2D5241 /* MemoryStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3857F70083709AF4836CC656 /* MemoryStatsView.swift */; };
 		3D676AA441A98CFFBD9B8898 /* RecordingAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D650DFEE7C02176D018F0B14 /* RecordingAttributes.swift */; };
 		3EA0AF94CEE89909CBCFC468 /* Haptic.swift in Sources */ = {isa = PBXBuildFile; fileRef = E88D4D17D6410CE852595CBF /* Haptic.swift */; };
 		3EC20A35FC6586E4EA67EE58 /* Chunk.swift in Sources */ = {isa = PBXBuildFile; fileRef = F24DC61161718D9A40130B4B /* Chunk.swift */; };
@@ -27,6 +29,8 @@
 		558721A2213785C9A540B0C5 /* AgentDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57C1BD607266EB615AF4EDCF /* AgentDashboardView.swift */; };
 		55948FA02AC8377ED5DC1411 /* Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D76B16306DF166BC8BF867 /* Recording.swift */; };
 		5E93ED3217066F669C995292 /* RecordingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455AB03D2B94AA822BDA923C /* RecordingEngine.swift */; };
+		5EB940A5A95725083A7561D1 /* SystemStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC65582A183F1EF1BD1BBAD1 /* SystemStatusView.swift */; };
+		5F6E78B351AF0F5499D4822B /* QualityMetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669095BC059E81D6729DBB38 /* QualityMetricsView.swift */; };
 		6233DC78CA5DAC295338DC8E /* SessionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 302D7BAD02239BFE95DA41A5 /* SessionListView.swift */; };
 		759216A92DA3F69CD7AEB290 /* OrchestratorModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0B11020DE21E3672FA8364B /* OrchestratorModels.swift */; };
 		86D732EAD84A6B28111361DA /* SonlifeAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23208DF6879E75D410F1BB90 /* SonlifeAppApp.swift */; };
@@ -40,8 +44,6 @@
 		C0145F94FC847B40A7856441 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C9FF92FC8160EDA69262158 /* SettingsView.swift */; };
 		D64D25C37313E858CFDF77FA /* ApprovalSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058E667057DEC875B2988207 /* ApprovalSheetView.swift */; };
 		DA8E3AB2D7F39EEE5B597B44 /* BudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F77DDC5E3788CFD159CE6B3 /* BudgetView.swift */; };
-		E6CAE176FA674E2EB5F4FB4E /* MemoryStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396C8E00D68B4FFAAE28417A /* MemoryStatsView.swift */; };
-		33ECB20D10FC4961AC5346E8 /* MarkdownText.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD518DF7A354B639CD34356 /* MarkdownText.swift */; };
 		DBF84366AC020FC2485C409D /* SonLifeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3700A2ABDB1FEBFB10085027 /* SonLifeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E1B7889E71D6DB45ACB7F513 /* SkillPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141DD0D3CB75BAD886A32C0F /* SkillPickerView.swift */; };
 		EE72B5E5FF868BDB9986EAF2 /* AudioLevelMeterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6A3D1C5F04C8FA6D76CB16 /* AudioLevelMeterView.swift */; };
@@ -87,6 +89,7 @@
 		3280D56D2C4346301D69422E /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
 		34A7C1D1FEBF929706E704C3 /* VADMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VADMonitor.swift; sourceTree = "<group>"; };
 		3700A2ABDB1FEBFB10085027 /* SonLifeWidgetExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = SonLifeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3857F70083709AF4836CC656 /* MemoryStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryStatsView.swift; sourceTree = "<group>"; };
 		3B1138EEC7185EE2E58E82A4 /* LifeLogControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeLogControlView.swift; sourceTree = "<group>"; };
 		3B901045F6314E749FB9EC43 /* RecordingDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingDetailView.swift; sourceTree = "<group>"; };
 		43F81FC68E7598A35C8C7FAD /* SonLifeWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonLifeWidgetBundle.swift; sourceTree = "<group>"; };
@@ -94,14 +97,15 @@
 		50E5B886F37C125525E5494F /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
 		57C1BD607266EB615AF4EDCF /* AgentDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDashboardView.swift; sourceTree = "<group>"; };
 		5C11E6D0FF4B113D6EFC45CA /* SonlifeApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SonlifeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		669095BC059E81D6729DBB38 /* QualityMetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QualityMetricsView.swift; sourceTree = "<group>"; };
 		6F77DDC5E3788CFD159CE6B3 /* BudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetView.swift; sourceTree = "<group>"; };
-		396C8E00D68B4FFAAE28417A /* MemoryStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryStatsView.swift; sourceTree = "<group>"; };
-		BCD518DF7A354B639CD34356 /* MarkdownText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownText.swift; sourceTree = "<group>"; };
 		791141A6AD10AC5CD4F07F31 /* LocationTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTracker.swift; sourceTree = "<group>"; };
+		7E1C507D92E7DFBD987BF889 /* MarkdownText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownText.swift; sourceTree = "<group>"; };
 		893BAC8D8B088C5A52B25EFA /* ChunkUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChunkUploader.swift; sourceTree = "<group>"; };
 		8B22B375F12F0CFB861FF2D9 /* CommandInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandInputView.swift; sourceTree = "<group>"; };
 		900F43CFDA48942DB97C02DC /* OrchestratorSessionHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrchestratorSessionHistoryView.swift; sourceTree = "<group>"; };
 		9F6A3D1C5F04C8FA6D76CB16 /* AudioLevelMeterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioLevelMeterView.swift; sourceTree = "<group>"; };
+		AC65582A183F1EF1BD1BBAD1 /* SystemStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemStatusView.swift; sourceTree = "<group>"; };
 		B436AC722A5923548F864CCF /* SonlifeApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SonlifeApp.entitlements; sourceTree = "<group>"; };
 		B446D7DC218291750F26EDC6 /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
 		B83A37312E737EFB7EBDB3D3 /* AgentSessionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSessionDetailView.swift; sourceTree = "<group>"; };
@@ -200,17 +204,19 @@
 				058E667057DEC875B2988207 /* ApprovalSheetView.swift */,
 				9F6A3D1C5F04C8FA6D76CB16 /* AudioLevelMeterView.swift */,
 				6F77DDC5E3788CFD159CE6B3 /* BudgetView.swift */,
-				396C8E00D68B4FFAAE28417A /* MemoryStatsView.swift */,
-				BCD518DF7A354B639CD34356 /* MarkdownText.swift */,
 				8B22B375F12F0CFB861FF2D9 /* CommandInputView.swift */,
 				50E5B886F37C125525E5494F /* FeedbackView.swift */,
 				3B1138EEC7185EE2E58E82A4 /* LifeLogControlView.swift */,
+				7E1C507D92E7DFBD987BF889 /* MarkdownText.swift */,
+				3857F70083709AF4836CC656 /* MemoryStatsView.swift */,
 				900F43CFDA48942DB97C02DC /* OrchestratorSessionHistoryView.swift */,
+				669095BC059E81D6729DBB38 /* QualityMetricsView.swift */,
 				3B901045F6314E749FB9EC43 /* RecordingDetailView.swift */,
 				E6793E222635D42106BC5962 /* SessionDetailView.swift */,
 				302D7BAD02239BFE95DA41A5 /* SessionListView.swift */,
 				0C9FF92FC8160EDA69262158 /* SettingsView.swift */,
 				141DD0D3CB75BAD886A32C0F /* SkillPickerView.swift */,
+				AC65582A183F1EF1BD1BBAD1 /* SystemStatusView.swift */,
 				D718BE03818C4F253C066849 /* TaskInboxView.swift */,
 			);
 			path = Views;
@@ -326,8 +332,6 @@
 				0E904D1C7D4200C3946080DC /* AudioRecorder.swift in Sources */,
 				33ADF2D93BC0D64810FA654B /* AudioSessionHandler.swift in Sources */,
 				DA8E3AB2D7F39EEE5B597B44 /* BudgetView.swift in Sources */,
-				E6CAE176FA674E2EB5F4FB4E /* MemoryStatsView.swift in Sources */,
-				33ECB20D10FC4961AC5346E8 /* MarkdownText.swift in Sources */,
 				3EC20A35FC6586E4EA67EE58 /* Chunk.swift in Sources */,
 				F91EDFFFD97622BAA12A7B13 /* ChunkUploader.swift in Sources */,
 				0CE8C2D5216E6BD7BE4A3E93 /* CommandInputView.swift in Sources */,
@@ -338,9 +342,12 @@
 				51D24605D58C173347DD72DA /* HarnessService.swift in Sources */,
 				F3D8C4C21B7A085B96ECBD84 /* LifeLogControlView.swift in Sources */,
 				4124635DDAE717AA2B8F22BE /* LocationTracker.swift in Sources */,
+				33133F1BD4659AF040C0F6E9 /* MarkdownText.swift in Sources */,
+				392227DBF6A25BCBBF2D5241 /* MemoryStatsView.swift in Sources */,
 				4F60DEA6669BDD4E804A6560 /* OrchestratorAPI.swift in Sources */,
 				759216A92DA3F69CD7AEB290 /* OrchestratorModels.swift in Sources */,
 				00C59C805972FF162FD898E4 /* OrchestratorSessionHistoryView.swift in Sources */,
+				5F6E78B351AF0F5499D4822B /* QualityMetricsView.swift in Sources */,
 				55948FA02AC8377ED5DC1411 /* Recording.swift in Sources */,
 				3D676AA441A98CFFBD9B8898 /* RecordingAttributes.swift in Sources */,
 				B3A43A5532CE0AC5F7B6D78F /* RecordingDetailView.swift in Sources */,
@@ -353,6 +360,7 @@
 				C0145F94FC847B40A7856441 /* SettingsView.swift in Sources */,
 				E1B7889E71D6DB45ACB7F513 /* SkillPickerView.swift in Sources */,
 				86D732EAD84A6B28111361DA /* SonlifeAppApp.swift in Sources */,
+				5EB940A5A95725083A7561D1 /* SystemStatusView.swift in Sources */,
 				A01C90CA879679BD2C4E4976 /* TaskInboxView.swift in Sources */,
 				A6793520B5E5D42E4B57D55F /* VADMonitor.swift in Sources */,
 			);
