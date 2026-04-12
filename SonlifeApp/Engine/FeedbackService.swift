@@ -25,6 +25,7 @@ enum FeedbackService {
             "device_id": deviceId,
             "device_token": token,
             "platform": "ios",
+            "supported_categories": ["APPROVAL_REQUEST", "FEEDBACK_REQUEST", "BRIEFING"],
         ]
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 

@@ -22,12 +22,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     private enum NotificationCategory {
         static let approvalRequest = "APPROVAL_REQUEST"
         static let feedbackRequest = "FEEDBACK_REQUEST"
+        static let briefing = "BRIEFING"
     }
 
     private enum NotificationAction {
         static let approve = "APPROVE_ACTION"
         static let reject = "REJECT_ACTION"
         static let open = "OPEN_ACTION"
+        static let detail = "DETAIL_ACTION"
     }
 
     func application(_ application: UIApplication,
@@ -66,7 +68,20 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
             options: []
         )
 
-        center.setNotificationCategories([approvalCategory, feedbackCategory])
+        // BRIEFING 카테고리 — 브리핑/요약 알림
+        let detailAction = UNNotificationAction(
+            identifier: NotificationAction.detail,
+            title: "자세히",
+            options: [.foreground]
+        )
+        let briefingCategory = UNNotificationCategory(
+            identifier: NotificationCategory.briefing,
+            actions: [detailAction],
+            intentIdentifiers: [],
+            options: []
+        )
+
+        center.setNotificationCategories([approvalCategory, feedbackCategory, briefingCategory])
 
         center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error = error {
@@ -146,6 +161,20 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
                 )
             }
 
+        case "briefing":
+            if actionId == NotificationAction.detail || actionId == UNNotificationDefaultActionIdentifier {
+                let sessionId = userInfo["session_id"] as? String
+                let briefingId = userInfo["briefing_id"] as? String
+                NotificationCenter.default.post(
+                    name: .showBriefingDetail,
+                    object: nil,
+                    userInfo: [
+                        "session_id": sessionId ?? "",
+                        "briefing_id": briefingId ?? "",
+                    ]
+                )
+            }
+
         default:
             break
         }
@@ -156,4 +185,5 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 extension Notification.Name {
     static let showFeedback = Notification.Name("SonLifeShowFeedback")
     static let showApproval = Notification.Name("SonLifeShowApproval")
+    static let showBriefingDetail = Notification.Name("SonLifeShowBriefingDetail")
 }

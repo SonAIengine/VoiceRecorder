@@ -1,3 +1,4 @@
+import AVFoundation
 import SwiftUI
 
 /// Phase A 명령 입력 화면.
@@ -11,6 +12,12 @@ struct CommandInputView: View {
     @State private var lastResponse: CommandResponse?
     @State private var errorMessage: String?
     @State private var pendingApproval: ApprovalDetail?
+
+    // D4: Voice input
+    @State private var isRecording = false
+    @State private var isTranscribing = false
+    @State private var audioRecorder: AVAudioRecorder?
+    @State private var recordingPulse = false
 
     // C-6: 실시간 이벤트 스트림
     @State private var liveEvents: [LiveEvent] = []
@@ -155,24 +162,61 @@ struct CommandInputView: View {
                 }
             }
             .safeAreaInset(edge: .bottom) {
-                Button {
-                    Task { await dispatch() }
-                } label: {
-                    Group {
-                        if isDispatching {
-                            ProgressView()
+                HStack(spacing: 12) {
+                    // D4: Mic button
+                    Button {
+                        if isRecording {
+                            stopVoiceRecording()
                         } else {
-                            Label("전송", systemImage: "paperplane.fill")
+                            startVoiceRecording()
+                        }
+                    } label: {
+                        ZStack {
+                            if isRecording {
+                                Circle()
+                                    .fill(Color.red.opacity(0.25))
+                                    .frame(width: 44, height: 44)
+                                    .scaleEffect(recordingPulse ? 1.3 : 1.0)
+                                    .animation(
+                                        .easeInOut(duration: 0.8).repeatForever(autoreverses: true),
+                                        value: recordingPulse
+                                    )
+                            }
+                            Image(systemName: isRecording ? "stop.circle.fill" : "mic.fill")
+                                .font(.title3)
+                                .foregroundStyle(isRecording ? .red : .blue)
+                                .frame(width: 44, height: 44)
                         }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
+                    .disabled(isDispatching || isTranscribing)
+                    .accessibilityLabel(isRecording ? "녹음 중지" : "음성 입력")
+
+                    if isTranscribing {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
+                    } else {
+                        // Send button
+                        Button {
+                            Task { await dispatch() }
+                        } label: {
+                            Group {
+                                if isDispatching {
+                                    ProgressView()
+                                } else {
+                                    Label("전송", systemImage: "paperplane.fill")
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        .disabled(inputText.trimmingCharacters(in: .whitespaces).isEmpty || isDispatching)
+                    }
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
                 .padding()
                 .background(.bar)
-                .disabled(inputText.trimmingCharacters(in: .whitespaces).isEmpty || isDispatching)
             }
             .sheet(item: $pendingApproval) { approval in
                 ApprovalSheetView(approval: approval) {
@@ -365,6 +409,130 @@ struct CommandInputView: View {
             errorMessage = "stream: \(error.localizedDescription)"
         }
         isDispatching = false
+    }
+
+    // MARK: - D4: Voice Recording
+
+    private var tempAudioURL: URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("voice_command.m4a")
+    }
+
+    private func startVoiceRecording() {
+        let session = AVAudioSession.sharedInstance()
+        do {
+            try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
+            try session.setActive(true)
+        } catch {
+            errorMessage = "마이크 권한이 필요합니다"
+            return
+        }
+
+        // Clean up old file
+        try? FileManager.default.removeItem(at: tempAudioURL)
+
+        let settings: [String: Any] = [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVSampleRateKey: 16000,
+            AVNumberOfChannelsKey: 1,
+            AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue,
+            AVEncoderBitRateKey: 32000,
+        ]
+
+        do {
+            let recorder = try AVAudioRecorder(url: tempAudioURL, settings: settings)
+            recorder.record()
+            audioRecorder = recorder
+            isRecording = true
+            recordingPulse = true
+            Haptic.tap(.light)
+        } catch {
+            errorMessage = "녹음 시작 실패: \(error.localizedDescription)"
+        }
+    }
+
+    private func stopVoiceRecording() {
+        guard let recorder = audioRecorder else { return }
+        recorder.stop()
+        audioRecorder = nil
+        isRecording = false
+        recordingPulse = false
+        Haptic.tap(.medium)
+
+        // Upload to STT server
+        transcribeAudio(url: tempAudioURL)
+    }
+
+    private func transcribeAudio(url: URL) {
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            errorMessage = "녹음 파일이 없습니다"
+            return
+        }
+
+        isTranscribing = true
+        errorMessage = nil
+
+        let endpoint = ChunkUploader.shared.currentServerURL.hasSuffix("/")
+            ? ChunkUploader.shared.currentServerURL + "api/transcribe"
+            : ChunkUploader.shared.currentServerURL + "/api/transcribe"
+
+        guard let requestURL = URL(string: endpoint) else {
+            errorMessage = "잘못된 서버 URL"
+            isTranscribing = false
+            return
+        }
+
+        var request = URLRequest(url: requestURL)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 30
+
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        guard let fileData = try? Data(contentsOf: url) else {
+            errorMessage = "녹음 파일 읽기 실패"
+            isTranscribing = false
+            return
+        }
+
+        var body = Data()
+        // file part
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"voice_command.m4a\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: audio/mp4\r\n\r\n".data(using: .utf8)!)
+        body.append(fileData)
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+
+        request.httpBody = body
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                self.isTranscribing = false
+
+                if let error {
+                    self.errorMessage = "STT 전송 실패: \(error.localizedDescription)"
+                    return
+                }
+                guard let data,
+                      let http = response as? HTTPURLResponse,
+                      http.statusCode == 200 else {
+                    self.errorMessage = "STT 서버 응답 오류"
+                    return
+                }
+
+                // ChunkUploader와 동일한 TranscribeResult 디코딩
+                if let result = try? JSONDecoder().decode(TranscribeResult.self, from: data),
+                   !result.text.trimmingCharacters(in: .whitespaces).isEmpty {
+                    self.inputText = result.text
+                    Haptic.success()
+                } else {
+                    self.errorMessage = "음성을 인식하지 못했습니다"
+                }
+
+                // Cleanup temp file
+                try? FileManager.default.removeItem(at: url)
+            }
+        }.resume()
     }
 
     private func summarizeEvent(_ event: SSEClient.Event) -> String {

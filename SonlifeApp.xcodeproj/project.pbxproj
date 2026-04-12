@@ -52,6 +52,7 @@
 		E1B7889E71D6DB45ACB7F513 /* SkillPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141DD0D3CB75BAD886A32C0F /* SkillPickerView.swift */; };
 		EE72B5E5FF868BDB9986EAF2 /* AudioLevelMeterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6A3D1C5F04C8FA6D76CB16 /* AudioLevelMeterView.swift */; };
 		F3D8C4C21B7A085B96ECBD84 /* LifeLogControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1138EEC7185EE2E58E82A4 /* LifeLogControlView.swift */; };
+		D2F1A3B4C5D6E7F809102030 /* SonlifeIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2F1A3B4C5D6E7F809102031 /* SonlifeIntents.swift */; };
 		F856027FFED5D5E9C37E1E08 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD4D02F58E925BDA8FA878D5 /* Assets.xcassets */; };
 		F91EDFFFD97622BAA12A7B13 /* ChunkUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893BAC8D8B088C5A52B25EFA /* ChunkUploader.swift */; };
 /* End PBXBuildFile section */
@@ -127,6 +128,7 @@
 		F0B11020DE21E3672FA8364B /* OrchestratorModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrchestratorModels.swift; sourceTree = "<group>"; };
 		F24DC61161718D9A40130B4B /* Chunk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chunk.swift; sourceTree = "<group>"; };
 		FD4D02F58E925BDA8FA878D5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D2F1A3B4C5D6E7F809102031 /* SonlifeIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonlifeIntents.swift; sourceTree = "<group>"; };
 		FE53E9A83394C73B0BE3BD29 /* SSEClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSEClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -161,10 +163,19 @@
 				B436AC722A5923548F864CCF /* SonlifeApp.entitlements */,
 				23208DF6879E75D410F1BB90 /* SonlifeAppApp.swift */,
 				7D346FA3116CEB31FBF6E676 /* Engine */,
+				D2F1A3B4C5D6E7F809102032 /* Intents */,
 				0F5E6640E60E227FB8BC00AF /* Models */,
 				B70C6333B2B9CB6CF7660B81 /* Views */,
 			);
 			path = SonlifeApp;
+			sourceTree = "<group>";
+		};
+		D2F1A3B4C5D6E7F809102032 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				D2F1A3B4C5D6E7F809102031 /* SonlifeIntents.swift */,
+			);
+			path = Intents;
 			sourceTree = "<group>";
 		};
 		7D346FA3116CEB31FBF6E676 /* Engine */ = {
@@ -370,6 +381,7 @@
 				1ED751D2ABCAB6C3696D186D /* SessionManager.swift in Sources */,
 				C0145F94FC847B40A7856441 /* SettingsView.swift in Sources */,
 				E1B7889E71D6DB45ACB7F513 /* SkillPickerView.swift in Sources */,
+				D2F1A3B4C5D6E7F809102030 /* SonlifeIntents.swift in Sources */,
 				86D732EAD84A6B28111361DA /* SonlifeAppApp.swift in Sources */,
 				5EB940A5A95725083A7561D1 /* SystemStatusView.swift in Sources */,
 				A01C90CA879679BD2C4E4976 /* TaskInboxView.swift in Sources */,
