@@ -308,8 +308,11 @@ struct SettingsView: View {
                 if let data,
                    let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                    let status = json["status"] as? String, status == "ok" {
-                    let whisper = (json["whisper"] as? [String: Any])?["model"] as? String ?? "?"
-                    testStatus = .success(whisper)
+                    let stt = (json["stt"] as? [String: Any]) ?? (json["whisper"] as? [String: Any])
+                    let model = stt?["model"] as? String ?? "?"
+                    let provider = stt?["provider"] as? String ?? ""
+                    let label = provider.isEmpty ? model : "\(provider) (\(model))"
+                    testStatus = .success(label)
                 } else {
                     testStatus = .failure("응답 파싱 실패")
                 }
