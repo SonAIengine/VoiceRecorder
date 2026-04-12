@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 // MARK: - Phase A Orchestrator Models
 //
@@ -79,25 +80,70 @@ struct ApprovalArgs: Codable {
     let to: String?
     let subject: String?
     let body: String?
-    let chatId: String?  // Teams send_teams_message 전용
+    let chatId: String?         // Teams send_teams_message 전용
+    // commit_and_push 전용
+    let repo: String?
+    let branch: String?
+    let commitMessage: String?
+    let fileChanges: [FileChange]?
+    let fullDiff: String?
 
     enum CodingKeys: String, CodingKey {
-        case to
-        case subject
-        case body
+        case to, subject, body
         case chatId = "chat_id"
+        case repo, branch
+        case commitMessage = "commit_message"
+        case fileChanges = "file_changes"
+        case fullDiff = "full_diff"
     }
 
     init(
         to: String? = nil,
         subject: String? = nil,
         body: String? = nil,
-        chatId: String? = nil
+        chatId: String? = nil,
+        repo: String? = nil,
+        branch: String? = nil,
+        commitMessage: String? = nil,
+        fileChanges: [FileChange]? = nil,
+        fullDiff: String? = nil
     ) {
         self.to = to
         self.subject = subject
         self.body = body
         self.chatId = chatId
+        self.repo = repo
+        self.branch = branch
+        self.commitMessage = commitMessage
+        self.fileChanges = fileChanges
+        self.fullDiff = fullDiff
+    }
+}
+
+struct FileChange: Codable, Identifiable {
+    let path: String
+    let status: String   // "modified" | "added" | "deleted" | "renamed"
+    let additions: Int
+    let deletions: Int
+
+    var id: String { path }
+
+    var statusIcon: String {
+        switch status {
+        case "added":    return "plus.circle.fill"
+        case "deleted":  return "minus.circle.fill"
+        case "renamed":  return "arrow.right.circle.fill"
+        default:         return "pencil.circle.fill"
+        }
+    }
+
+    var statusColor: Color {
+        switch status {
+        case "added":   return .green
+        case "deleted": return .red
+        case "renamed": return .orange
+        default:        return .blue
+        }
     }
 }
 
@@ -319,6 +365,8 @@ struct SessionToolCall: Codable, Identifiable {
     let toolName: String
     let status: String
     let createdAt: String
+    let argsJson: String?
+    let resultJson: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -327,10 +375,54 @@ struct SessionToolCall: Codable, Identifiable {
         case toolName = "tool_name"
         case status
         case createdAt = "created_at"
+        case argsJson = "args_json"
+        case resultJson = "result_json"
     }
 
     var isSubAgent: Bool { status == "sub_agent" }
     var isAutoCompact: Bool { toolName == "_auto_compact" }
+
+    /// args_json 에서 특정 키의 문자열 값을 꺼냄
+    func argString(_ key: String) -> String? {
+        guard let json = argsJson,
+              let data = json.data(using: .utf8),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { return nil }
+        return obj[key] as? String
+    }
+
+    /// 사람이 읽을 수 있는 핵심 내용 — 도구별 특화
+    var primaryContent: String? {
+        switch toolName {
+        case "send_teams_message", "send_kakao_message":
+            return argString("body")
+        case "email_send", "email_compose_draft":
+            var parts: [String] = []
+            if let to = argString("to") { parts.append("To: \(to)") }
+            if let subj = argString("subject") { parts.append("제목: \(subj)") }
+            if let body = argString("body") { parts.append(body) }
+            return parts.isEmpty ? nil : parts.joined(separator: "\n")
+        case "calendar_create_event":
+            var parts: [String] = []
+            if let title = argString("title") { parts.append(title) }
+            if let start = argString("start") { parts.append("시작: \(start)") }
+            return parts.isEmpty ? nil : parts.joined(separator: "\n")
+        default:
+            return nil
+        }
+    }
+
+    var toolDisplayName: String {
+        switch toolName {
+        case "send_teams_message": return "Teams 메시지 전송"
+        case "send_kakao_message": return "카카오톡 전송"
+        case "email_send": return "이메일 발송"
+        case "email_compose_draft": return "이메일 초안 작성"
+        case "calendar_create_event": return "일정 생성"
+        case "_auto_compact": return "컨텍스트 압축"
+        default: return toolName
+        }
+    }
 }
 
 struct SessionDetailResponse: Codable {

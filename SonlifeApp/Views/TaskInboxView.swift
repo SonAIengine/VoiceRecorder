@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 /// Phase A+ — 작업 인박스 (메인 화면).
 ///
@@ -17,6 +18,7 @@ import SwiftUI
 /// - 오른쪽 +: 새 명령 입력
 struct TaskInboxView: View {
     @Bindable var recorder: AudioRecorder
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var pendingApprovals: [ApprovalDetail] = []
     @State private var runningSessions: [OrchestratorSession] = []
@@ -36,6 +38,12 @@ struct TaskInboxView: View {
 
     // C: 스와이프 액션 처리 중인 토큰 (중복 방지)
     @State private var processingApprovalTokens: Set<String> = []
+
+    // 폴링 최적화: 백그라운드 진입 시 중단, SSE 활성 시 간격 확대
+    @State private var isAppActive = true
+
+    // 오프라인 큐
+    private var offlineQueue: OfflineQueue { OfflineQueue.shared }
 
     private var isFullyEmpty: Bool {
         pendingApprovals.isEmpty && runningSessions.isEmpty && doneSessions.isEmpty
@@ -261,8 +269,15 @@ struct TaskInboxView: View {
             Haptic.success()
             await loadAll()
         } catch {
-            Haptic.error()
-            errorMessage = "승인 실패: \(error.localizedDescription)"
+            if OfflineQueue.isNetworkError(error) {
+                offlineQueue.enqueue(.approve(token: approval.token))
+                Haptic.warning()
+                // 로컬 목록에서 즉시 제거 (전송 대기 큐로 이동됨)
+                pendingApprovals.removeAll { $0.token == approval.token }
+            } else {
+                Haptic.error()
+                errorMessage = "승인 실패: \(error.localizedDescription)"
+            }
         }
     }
 
@@ -276,19 +291,32 @@ struct TaskInboxView: View {
             Haptic.warning()
             await loadAll()
         } catch {
-            Haptic.error()
-            errorMessage = "거절 실패: \(error.localizedDescription)"
+            if OfflineQueue.isNetworkError(error) {
+                offlineQueue.enqueue(.reject(token: approval.token, reason: "인박스에서 거절"))
+                Haptic.warning()
+                pendingApprovals.removeAll { $0.token == approval.token }
+            } else {
+                Haptic.error()
+                errorMessage = "거절 실패: \(error.localizedDescription)"
+            }
         }
     }
 
     // MARK: - body wrapper
 
     var body: some View {
-        Group {
-            if isFullyEmpty && !isLoading && errorMessage == nil {
-                emptyStateView
-            } else {
-                inboxList
+        VStack(spacing: 0) {
+            // 오프라인 / 큐 배너
+            if !offlineQueue.isOnline || offlineQueue.count > 0 {
+                offlineBanner
+            }
+
+            Group {
+                if isFullyEmpty && !isLoading && errorMessage == nil {
+                    emptyStateView
+                } else {
+                    inboxList
+                }
             }
         }
         .navigationTitle("작업")
@@ -325,10 +353,27 @@ struct TaskInboxView: View {
             await loadAll()
         }
         .task {
-            // 5초 폴링: 진행 중 세션 라이브 업데이트. 뷰 이탈 시 Task 자동 취소.
             while !Task.isCancelled {
-                await loadAll()
-                try? await Task.sleep(for: .seconds(5))
+                if isAppActive {
+                    await loadAll()
+                }
+                // SSE 스트림이 살아있으면 폴링은 보조 역할 → 30초, 없으면 5초
+                let interval: Duration = streamTasks.isEmpty ? .seconds(5) : .seconds(30)
+                try? await Task.sleep(for: interval)
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .active:
+                isAppActive = true
+                Task { await loadAll() }
+            case .background, .inactive:
+                isAppActive = false
+                for (_, task) in streamTasks { task.cancel() }
+                streamTasks.removeAll()
+                liveStates.removeAll()
+            @unknown default:
+                break
             }
         }
         .sheet(isPresented: $showingCommandInput) {
@@ -366,6 +411,9 @@ struct TaskInboxView: View {
 
             // B: 진행 중 세션의 SSE 스트림 관리 — 새로 생긴 세션에 open, 없어진 세션에 cancel
             syncStreams()
+
+            // 위젯 데이터 갱신
+            updateWidgetData(pending: p, running: runningSessions)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -451,6 +499,80 @@ struct TaskInboxView: View {
     private func isTerminalEvent(_ type: String) -> Bool {
         type == "session.completed" || type == "session.failed"
             || type == "session.suspended" || type == "end"
+    }
+
+    // MARK: - 위젯 데이터 갱신
+
+    private func updateWidgetData(pending: [ApprovalDetail], running: [OrchestratorSession]) {
+        let items = pending.prefix(5).map { a in
+            WidgetData.Snapshot.Item(
+                token: a.token,
+                title: a.triggerContext?.sender.map { "\($0) · \(a.triggerContext?.displaySourceLabel ?? "")" }
+                    ?? a.preview.summary
+                    ?? a.toolName.replacingOccurrences(of: "_", with: " "),
+                toolLabel: toolFriendlyLabel(a.toolName),
+                source: a.triggerContext?.source,
+                createdAt: a.createdAt
+            )
+        }
+        let snapshot = WidgetData.Snapshot(
+            pendingCount: pending.count,
+            runningCount: running.count,
+            items: Array(items),
+            updatedAt: Date()
+        )
+        WidgetData.save(snapshot)
+        WidgetCenter.shared.reloadTimelines(ofKind: "PendingApprovalsWidget")
+    }
+
+    private func toolFriendlyLabel(_ name: String) -> String {
+        switch name {
+        case "send_email", "email_send": return "이메일 발송"
+        case "send_teams_message": return "Teams 메시지 발송"
+        case "commit_and_push", "git_push": return "Git push"
+        case "create_calendar_event": return "일정 생성"
+        default: return name.replacingOccurrences(of: "_", with: " ")
+        }
+    }
+
+    // MARK: - Offline banner
+
+    private var offlineBanner: some View {
+        HStack(spacing: 8) {
+            if !offlineQueue.isOnline {
+                Image(systemName: "wifi.slash")
+                    .font(.caption)
+                Text("오프라인")
+                    .font(.caption.weight(.semibold))
+            }
+            if offlineQueue.count > 0 {
+                if offlineQueue.isOnline {
+                    Image(systemName: "arrow.up.circle")
+                        .font(.caption)
+                    Text("전송 대기 \(offlineQueue.count)건")
+                        .font(.caption.weight(.semibold))
+                    if offlineQueue.isDraining {
+                        ProgressView()
+                            .scaleEffect(0.6)
+                    }
+                } else {
+                    Text("· 대기 \(offlineQueue.count)건")
+                        .font(.caption)
+                }
+            }
+            Spacer()
+            if offlineQueue.isOnline && offlineQueue.count > 0 && !offlineQueue.isDraining {
+                Button("재전송") {
+                    Task { await offlineQueue.drain() }
+                }
+                .font(.caption.weight(.medium))
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(offlineQueue.isOnline ? Color.blue.opacity(0.1) : Color.red.opacity(0.1))
+        .foregroundStyle(offlineQueue.isOnline ? .blue : .red)
     }
 }
 

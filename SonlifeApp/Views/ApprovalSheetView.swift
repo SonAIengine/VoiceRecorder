@@ -93,17 +93,19 @@ struct ApprovalSheetView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("닫기") { dismiss() }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(isEditing ? "취소" : "수정") {
-                        if isEditing {
-                            editedTo = approval.args.to ?? ""
-                            editedSubject = approval.args.subject ?? ""
-                            editedBody = approval.args.body ?? ""
-                            editedChatId = approval.args.chatId ?? ""
+                if toolKind != .commit {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(isEditing ? "취소" : "수정") {
+                            if isEditing {
+                                editedTo = approval.args.to ?? ""
+                                editedSubject = approval.args.subject ?? ""
+                                editedBody = approval.args.body ?? ""
+                                editedChatId = approval.args.chatId ?? ""
+                            }
+                            isEditing.toggle()
                         }
-                        isEditing.toggle()
+                        .disabled(isSubmitting || resultMessage != nil)
                     }
-                    .disabled(isSubmitting || resultMessage != nil)
                 }
             }
             .safeAreaInset(edge: .bottom) {
@@ -229,10 +231,10 @@ struct ApprovalSheetView: View {
     private var draftCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
-                Image(systemName: "square.and.pencil")
+                Image(systemName: toolKind == .commit ? "chevron.left.forwardslash.chevron.right" : "square.and.pencil")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(heroColor)
-                Text("보낼 답장")
+                Text(toolKind == .commit ? "변경 사항" : "보낼 답장")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(heroColor)
                 Spacer()
@@ -248,11 +250,13 @@ struct ApprovalSheetView: View {
                 emailEditor
             case .teams:
                 teamsEditor
-            case .commit, .other:
+            case .commit:
+                commitDiffView
+            case .other:
                 rawEditor
             }
 
-            if !isEditing {
+            if !isEditing && toolKind != .commit {
                 Text("탭해서 수정")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
@@ -267,7 +271,7 @@ struct ApprovalSheetView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .contentShape(Rectangle())
         .onTapGesture {
-            if !isEditing, !isSubmitting, resultMessage == nil {
+            if !isEditing, !isSubmitting, resultMessage == nil, toolKind != .commit {
                 isEditing = true
             }
         }
@@ -332,6 +336,107 @@ struct ApprovalSheetView: View {
             }
         }
     }
+
+    // MARK: - Commit diff view
+
+    @State private var showFullDiff = false
+
+    private var commitDiffView: some View {
+        let args = approval.args
+        return VStack(alignment: .leading, spacing: 12) {
+            // 리포 + 브랜치
+            if let repo = args.repo {
+                HStack(spacing: 6) {
+                    Image(systemName: "folder.badge.gearshape")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(repo)
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
+                    if let branch = args.branch {
+                        Text("→")
+                            .foregroundStyle(.tertiary)
+                        Text(branch)
+                            .font(.caption.monospaced().weight(.semibold))
+                            .foregroundStyle(.orange)
+                    }
+                }
+            }
+
+            // 커밋 메시지
+            if let msg = args.commitMessage, !msg.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("커밋 메시지")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                    Text(msg)
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                }
+            }
+
+            // 파일 변경 목록
+            if let changes = args.fileChanges, !changes.isEmpty {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("변경 파일 (\(changes.count))")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                        .padding(.bottom, 6)
+
+                    ForEach(changes) { file in
+                        HStack(spacing: 6) {
+                            Image(systemName: file.statusIcon)
+                                .font(.caption2)
+                                .foregroundStyle(file.statusColor)
+                                .frame(width: 14)
+                            Text(file.path)
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.primary)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            Spacer(minLength: 4)
+                            if file.additions > 0 {
+                                Text("+\(file.additions)")
+                                    .font(.caption2.monospacedDigit())
+                                    .foregroundStyle(.green)
+                            }
+                            if file.deletions > 0 {
+                                Text("-\(file.deletions)")
+                                    .font(.caption2.monospacedDigit())
+                                    .foregroundStyle(.red)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                        Divider()
+                    }
+                }
+            }
+
+            // Full diff (접기/펼치기)
+            if let diff = args.fullDiff, !diff.isEmpty {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showFullDiff.toggle()
+                    }
+                } label: {
+                    Label(
+                        showFullDiff ? "diff 접기" : "diff 펼치기",
+                        systemImage: showFullDiff ? "chevron.up" : "chevron.down"
+                    )
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.blue)
+                }
+                .buttonStyle(.plain)
+
+                if showFullDiff {
+                    DiffTextView(diff: diff)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+        }
+    }
+
+    // MARK: - Raw editor (other tools)
 
     private var rawEditor: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -560,4 +665,61 @@ private enum ToolKind {
     case teams
     case commit
     case other
+}
+
+// MARK: - Diff text view
+
+/// unified diff를 줄별로 파싱해 +/- 색상으로 렌더링.
+/// 외부 라이브러리 없이 순수 SwiftUI.
+private struct DiffTextView: View {
+    let diff: String
+
+    private var lines: [DiffLine] { parseDiff(diff) }
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyVStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                    Text(line.text)
+                        .font(.system(size: 11, design: .monospaced))
+                        .foregroundStyle(line.color)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(line.background)
+                        .textSelection(.enabled)
+                }
+            }
+            .padding(8)
+        }
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .strokeBorder(Color(.separator), lineWidth: 0.5)
+        )
+        .frame(maxHeight: 400)
+    }
+}
+
+private struct DiffLine {
+    let text: String
+    let color: Color
+    let background: Color
+}
+
+private func parseDiff(_ diff: String) -> [DiffLine] {
+    diff.components(separatedBy: .newlines).map { raw in
+        if raw.hasPrefix("+++") || raw.hasPrefix("---") {
+            return DiffLine(text: raw, color: .secondary, background: .clear)
+        } else if raw.hasPrefix("+") {
+            return DiffLine(text: raw, color: .green, background: Color.green.opacity(0.08))
+        } else if raw.hasPrefix("-") {
+            return DiffLine(text: raw, color: .red, background: Color.red.opacity(0.08))
+        } else if raw.hasPrefix("@@") {
+            return DiffLine(text: raw, color: .indigo, background: Color.indigo.opacity(0.08))
+        } else if raw.hasPrefix("diff ") || raw.hasPrefix("index ") {
+            return DiffLine(text: raw, color: .secondary, background: .clear)
+        } else {
+            return DiffLine(text: raw, color: .primary, background: .clear)
+        }
+    }
 }

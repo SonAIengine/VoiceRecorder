@@ -8,6 +8,7 @@ struct AgentDashboardView: View {
     @State private var errorMessage: String?
     @State private var selectedTab: DashboardTab = .sessions
     @State private var showingCommandInput = false
+    @State private var budgetSummary: BudgetSummary?
 
     enum DashboardTab: String, CaseIterable {
         case sessions = "세션"
@@ -17,6 +18,11 @@ struct AgentDashboardView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                // 예산 인라인 카드
+                if let budget = budgetSummary {
+                    inlineBudgetCard(budget)
+                }
+
                 // Phase A — 명령 + 실행 기록 진입점
                 HStack(spacing: 12) {
                     Button {
@@ -217,15 +223,60 @@ struct AgentDashboardView: View {
         async let s = HarnessService.fetchStats()
         async let sess = HarnessService.fetchSessions(limit: 50)
         async let fb = HarnessService.fetchFeedback(limit: 20)
+        async let bgt = OrchestratorAPI.fetchBudget()
         do {
-            let (statsResult, sessionsResult, feedbackResult) = try await (s, sess, fb)
+            let (statsResult, sessionsResult, feedbackResult, budgetResult) = try await (s, sess, fb, bgt)
             stats = statsResult
             sessions = sessionsResult
             lessons = feedbackResult
+            budgetSummary = budgetResult
         } catch {
             errorMessage = error.localizedDescription
         }
         isLoading = false
+    }
+
+    // MARK: - Inline budget card
+
+    private func inlineBudgetCard(_ budget: BudgetSummary) -> some View {
+        NavigationLink(destination: BudgetView()) {
+            HStack(spacing: 12) {
+                Image(systemName: "dollarsign.circle.fill")
+                    .font(.title3)
+                    .foregroundStyle(budget.globalCostUsd > 0 ? .green : .secondary)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("오늘 사용량")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    Text(String(format: "$%.4f", budget.globalCostUsd))
+                        .font(.subheadline.weight(.bold).monospacedDigit())
+                        .foregroundStyle(.primary)
+                }
+
+                Spacer()
+
+                if !budget.agents.isEmpty {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("에이전트")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                        Text("\(budget.agents.count)개")
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
     }
 }
 

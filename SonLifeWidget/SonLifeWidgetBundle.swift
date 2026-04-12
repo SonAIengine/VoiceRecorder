@@ -5,5 +5,6 @@ import WidgetKit
 struct SonLifeWidgetBundle: WidgetBundle {
     var body: some Widget {
         SonLifeLiveActivity()
+        PendingApprovalsWidget()
     }
 }

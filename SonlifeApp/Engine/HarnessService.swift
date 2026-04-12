@@ -411,7 +411,10 @@ enum HarnessService {
     // MARK: - Private
 
     private static func get(_ path: String) async throws -> Data {
-        guard let url = URL(string: serverURL)?.appendingPathComponent(path) else {
+        // path 에 쿼리스트링이 포함될 수 있으므로 appendingPathComponent 대신
+        // 직접 문자열 합산 후 URL(string:) 사용 (appendingPathComponent 는 ? 를 인코딩함)
+        let base = serverURL.hasSuffix("/") ? serverURL : serverURL + "/"
+        guard let url = URL(string: base + path) else {
             throw URLError(.badURL)
         }
         var request = URLRequest(url: url)

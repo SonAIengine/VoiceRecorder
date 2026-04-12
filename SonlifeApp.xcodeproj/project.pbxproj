@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00A1B2C3D4E5F6071819AAAA /* WidgetData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A1B2C3D4E5F6071819BBBB /* WidgetData.swift */; };
+		00A1B2C3D4E5F6071819CCCC /* WidgetData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A1B2C3D4E5F6071819BBBB /* WidgetData.swift */; };
+		00A1B2C3D4E5F6071819DDDD /* PendingApprovalsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A1B2C3D4E5F6071819EEEE /* PendingApprovalsWidget.swift */; };
 		00C59C805972FF162FD898E4 /* OrchestratorSessionHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 900F43CFDA48942DB97C02DC /* OrchestratorSessionHistoryView.swift */; };
 		0AE7498ED86D53DC777F3A2A /* FeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0FE8065B0084985ABF09B7 /* FeedbackService.swift */; };
 		0CE8C2D5216E6BD7BE4A3E93 /* CommandInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B22B375F12F0CFB861FF2D9 /* CommandInputView.swift */; };
@@ -20,6 +23,7 @@
 		392227DBF6A25BCBBF2D5241 /* MemoryStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3857F70083709AF4836CC656 /* MemoryStatsView.swift */; };
 		3D676AA441A98CFFBD9B8898 /* RecordingAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D650DFEE7C02176D018F0B14 /* RecordingAttributes.swift */; };
 		3EA0AF94CEE89909CBCFC468 /* Haptic.swift in Sources */ = {isa = PBXBuildFile; fileRef = E88D4D17D6410CE852595CBF /* Haptic.swift */; };
+		A1B2C3D4E5F60718192A3B4C /* OfflineQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C60718293A4B5D /* OfflineQueue.swift */; };
 		3EC20A35FC6586E4EA67EE58 /* Chunk.swift in Sources */ = {isa = PBXBuildFile; fileRef = F24DC61161718D9A40130B4B /* Chunk.swift */; };
 		4124635DDAE717AA2B8F22BE /* LocationTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 791141A6AD10AC5CD4F07F31 /* LocationTracker.swift */; };
 		4EB468F46A971448E2B096B3 /* SSEClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE53E9A83394C73B0BE3BD29 /* SSEClient.swift */; };
@@ -115,6 +119,9 @@
 		DBF2D3242875E6D8B3B2B682 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		E4F0CD21F732C80869F81376 /* AudioSessionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSessionHandler.swift; sourceTree = "<group>"; };
 		E6793E222635D42106BC5962 /* SessionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailView.swift; sourceTree = "<group>"; };
+		00A1B2C3D4E5F6071819BBBB /* WidgetData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetData.swift; sourceTree = "<group>"; };
+		00A1B2C3D4E5F6071819EEEE /* PendingApprovalsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingApprovalsWidget.swift; sourceTree = "<group>"; };
+		D1E2F3A4B5C60718293A4B5D /* OfflineQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineQueue.swift; sourceTree = "<group>"; };
 		E88D4D17D6410CE852595CBF /* Haptic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptic.swift; sourceTree = "<group>"; };
 		E901EDE672F6DC7C032E42EC /* SonLifeLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonLifeLiveActivity.swift; sourceTree = "<group>"; };
 		F0B11020DE21E3672FA8364B /* OrchestratorModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrchestratorModels.swift; sourceTree = "<group>"; };
@@ -138,6 +145,7 @@
 		3225AE8E4D95FB1E35C4C2D4 /* SonLifeWidget */ = {
 			isa = PBXGroup;
 			children = (
+				00A1B2C3D4E5F6071819EEEE /* PendingApprovalsWidget.swift */,
 				E901EDE672F6DC7C032E42EC /* SonLifeLiveActivity.swift */,
 				43F81FC68E7598A35C8C7FAD /* SonLifeWidgetBundle.swift */,
 			);
@@ -168,6 +176,7 @@
 				E88D4D17D6410CE852595CBF /* Haptic.swift */,
 				0C786B892A2C7ACD414C15B4 /* HarnessService.swift */,
 				791141A6AD10AC5CD4F07F31 /* LocationTracker.swift */,
+				D1E2F3A4B5C60718293A4B5D /* OfflineQueue.swift */,
 				CA0F936383052F1EE4A16347 /* OrchestratorAPI.swift */,
 				455AB03D2B94AA822BDA923C /* RecordingEngine.swift */,
 				B446D7DC218291750F26EDC6 /* SessionManager.swift */,
@@ -226,6 +235,7 @@
 			isa = PBXGroup;
 			children = (
 				D650DFEE7C02176D018F0B14 /* RecordingAttributes.swift */,
+				00A1B2C3D4E5F6071819BBBB /* WidgetData.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -344,6 +354,7 @@
 				4124635DDAE717AA2B8F22BE /* LocationTracker.swift in Sources */,
 				33133F1BD4659AF040C0F6E9 /* MarkdownText.swift in Sources */,
 				392227DBF6A25BCBBF2D5241 /* MemoryStatsView.swift in Sources */,
+				A1B2C3D4E5F60718192A3B4C /* OfflineQueue.swift in Sources */,
 				4F60DEA6669BDD4E804A6560 /* OrchestratorAPI.swift in Sources */,
 				759216A92DA3F69CD7AEB290 /* OrchestratorModels.swift in Sources */,
 				00C59C805972FF162FD898E4 /* OrchestratorSessionHistoryView.swift in Sources */,
@@ -363,6 +374,7 @@
 				5EB940A5A95725083A7561D1 /* SystemStatusView.swift in Sources */,
 				A01C90CA879679BD2C4E4976 /* TaskInboxView.swift in Sources */,
 				A6793520B5E5D42E4B57D55F /* VADMonitor.swift in Sources */,
+				00A1B2C3D4E5F6071819AAAA /* WidgetData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -370,9 +382,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				00A1B2C3D4E5F6071819DDDD /* PendingApprovalsWidget.swift in Sources */,
 				38CE97793CDF3204748C7773 /* RecordingAttributes.swift in Sources */,
 				529294B032FF8AA3B50F69C6 /* SonLifeLiveActivity.swift in Sources */,
 				A204D2751F0F29F7FA916632 /* SonLifeWidgetBundle.swift in Sources */,
+				00A1B2C3D4E5F6071819CCCC /* WidgetData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
